@@ -1,72 +1,47 @@
 <?php
 session_start();
 $con=mysqli_connect("localhost","root","","myhmsdb");
-if(isset($_POST['patsub1'])){
-	$fname=$_POST['fname'];
-  $lname=$_POST['lname'];
-  $gender=$_POST['gender'];
-  $email=$_POST['email'];
-  $contact=$_POST['contact'];
-	$password=$_POST['password'];
-  $cpassword=$_POST['cpassword'];
-  if($password==$cpassword){
-  	$query="insert into patreg(fname,lname,gender,email,contact,password,cpassword) values ('$fname','$lname','$gender','$email','$contact','$password','$cpassword');";
-    $result=mysqli_query($con,$query);
-    if($result){
-        $_SESSION['username'] = $_POST['fname']." ".$_POST['lname'];
-        $_SESSION['fname'] = $_POST['fname'];
-        $_SESSION['lname'] = $_POST['lname'];
-        $_SESSION['gender'] = $_POST['gender'];
-        $_SESSION['contact'] = $_POST['contact'];
-        $_SESSION['email'] = $_POST['email'];
-        header("Location:admin-panel.php");
-    } 
-
-    $query1 = "select * from patreg;";
-    $result1 = mysqli_query($con,$query1);
-    if($result1){
-      $_SESSION['pid'] = $row['pid'];
+if(isset($_POST['docsub1'])){
+  $dname=$_POST['username3'];
+  $dpass=$_POST['password3'];
+  
+  $query="select * from doctb where username=? and password=?;";
+  $stmt= mysqli_prepare($con, $query);
+  if($stmt){
+    mysqli_stmt_bind_param($stmt, "ss", $dname, $dpass);
+    if(mysqli_stmt_execute($stmt)){
+      $result = mysqli_stmt_get_result($stmt);
+      if(mysqli_num_rows($result)==1)
+      {
+        while($row=mysqli_fetch_array($result,MYSQLI_ASSOC)){
+          $_SESSION['dname']=$row['username'];
+        }
+        mysqli_stmt_close($stmt);
+        header("Location:doctor-panel.php");
+        exit();
+      }
+      else{
+        mysqli_stmt_close($stmt);
+        echo("<script>alert('Invalid Username or Password. Try Again!');
+              window.location.href = 'index.php';</script>");
+        exit();
+      }
     }
-
-  }
-  else{
-    header("Location:error1.php");
   }
 }
-if(isset($_POST['update_data']))
+
+function display_docs()
 {
-	$contact=$_POST['contact'];
-	$status=$_POST['status'];
-	$query="update appointmenttb set payment='$status' where contact='$contact';";
-	$result=mysqli_query($con,$query);
-	if($result)
-		header("Location:updated.php");
+  global $con;
+  $query="select username from doctb";
+  $result=mysqli_query($con,$query);
+  while($row=mysqli_fetch_array($result,MYSQLI_ASSOC))
+  {
+    $name=htmlspecialchars((string)$row['username'], ENT_QUOTES);
+    echo '<option value="'.$name.'">'.$name.'</option>';
+  }
 }
 
-
-
-
-// function display_docs()
-// {
-// 	global $con;
-// 	$query="select * from doctb";
-// 	$result=mysqli_query($con,$query);
-// 	while($row=mysqli_fetch_array($result))
-// 	{
-// 		$name=$row['name'];
-// 		# echo'<option value="" disabled selected>Select Doctor</option>';
-// 		echo '<option value="'.$name.'">'.$name.'</option>';
-// 	}
-// }
-
-if(isset($_POST['doc_sub']))
-{
-	$name=$_POST['name'];
-	$query="insert into doctb(name)values('$name')";
-	$result=mysqli_query($con,$query);
-	if($result)
-		header("Location:adddoc.php");
-}
 function display_admin_panel(){
 	echo '<!DOCTYPE html>
 <html lang="en">

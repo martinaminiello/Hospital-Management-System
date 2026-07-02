@@ -1,16 +1,30 @@
 <!DOCTYPE html>
 <?php 
 include('func1.php');
-$con=mysqli_connect("localhost","root","","myhmsdb");
+$con = mysqli_connect("localhost", "root", "", "myhmsdb");
 $doctor = $_SESSION['dname'];
-if(isset($_GET['cancel']))
-  {
-    $query=mysqli_query($con,"update appointmenttb set doctorStatus='0' where ID = '".$_GET['ID']."'");
-    if($query)
-    {
-      echo "<script>alert('Your appointment successfully cancelled');</script>";
+
+if(isset($_GET['cancel']) && isset($_GET['ID']))
+{
+    $id = (int)$_GET['ID']; 
+    $query = "UPDATE appointmenttb SET doctorStatus = '0' WHERE ID = ?";
+    $stmt = mysqli_prepare($con, $query);
+    
+    if($stmt) {
+  
+        mysqli_stmt_bind_param($stmt, "i", $id);
+        if(mysqli_stmt_execute($stmt)) {
+            mysqli_stmt_close($stmt);
+     
+            echo "<script>alert('Your appointment successfully cancelled'); window.location.href='doctor-panel.php';</script>";
+            exit();
+        } else {
+            echo "<script>alert('Unable to cancel the appointment. Try again!');</script>";
+        }
+    } else {
+        die("Error in preparing query: " . mysqli_error($con));
     }
-  }
+}
 
   // if(isset($_GET['prescribe'])){
     
@@ -177,74 +191,80 @@ if(isset($_GET['cancel']))
 
                   </tr>
                 </thead>
-                <tbody>
+             <tbody>
                   <?php 
-                    $con=mysqli_connect("localhost","root","","myhmsdb");
-                    global $con;
+                    $con = mysqli_connect("localhost", "root", "", "myhmsdb");
                     $dname = $_SESSION['dname'];
-                    $query = "select pid,ID,fname,lname,gender,email,contact,appdate,apptime,userStatus,doctorStatus from appointmenttb where doctor='$dname';";
-                    $result = mysqli_query($con,$query);
-                    while ($row = mysqli_fetch_array($result)){
+                    
+                    $query = "SELECT pid, ID, fname, lname, gender, email, contact, appdate, apptime, userStatus, doctorStatus FROM appointmenttb WHERE doctor = ?;";
+                    $stmt = mysqli_prepare($con, $query);
+                    
+                    if($stmt) {
+                      mysqli_stmt_bind_param($stmt, "s", $dname);
+                      if(mysqli_stmt_execute($stmt)) {
+                        $result = mysqli_stmt_get_result($stmt);
+                        while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)){
+                          $pid = htmlspecialchars((string)$row['pid'], ENT_QUOTES);
+                          $id = htmlspecialchars((string)$row['ID'], ENT_QUOTES);
+                          $fname = htmlspecialchars((string)$row['fname'], ENT_QUOTES);
+                          $lname = htmlspecialchars((string)$row['lname'], ENT_QUOTES);
+                          $gender = htmlspecialchars((string)$row['gender'], ENT_QUOTES);
+                          $email = htmlspecialchars((string)$row['email'], ENT_QUOTES);
+                          $contact = htmlspecialchars((string)$row['contact'], ENT_QUOTES);
+                          $appdate = htmlspecialchars((string)$row['appdate'], ENT_QUOTES);
+                          $apptime = htmlspecialchars((string)$row['apptime'], ENT_QUOTES);
+                          $userStatus = (int)$row['userStatus'];
+                          $doctorStatus = (int)$row['doctorStatus'];
                       ?>
-                      <tr>
-                      <td><?php echo $row['pid'];?></td>
-                        <td><?php echo $row['ID'];?></td>
-                        <td><?php echo $row['fname'];?></td>
-                        <td><?php echo $row['lname'];?></td>
-                        <td><?php echo $row['gender'];?></td>
-                        <td><?php echo $row['email'];?></td>
-                        <td><?php echo $row['contact'];?></td>
-                        <td><?php echo $row['appdate'];?></td>
-                        <td><?php echo $row['apptime'];?></td>
-                        <td>
-                    <?php if(($row['userStatus']==1) && ($row['doctorStatus']==1))  
-                    {
-                      echo "Active";
-                    }
-                    if(($row['userStatus']==0) && ($row['doctorStatus']==1))  
-                    {
-                      echo "Cancelled by Patient";
-                    }
-
-                    if(($row['userStatus']==1) && ($row['doctorStatus']==0))  
-                    {
-                      echo "Cancelled by You";
-                    }
-                        ?></td>
-
-                     <td>
-                        <?php if(($row['userStatus']==1) && ($row['doctorStatus']==1))  
-                        { ?>
-
-													
-	                        <a href="doctor-panel.php?ID=<?php echo $row['ID']?>&cancel=update" 
-                              onClick="return confirm('Are you sure you want to cancel this appointment ?')"
-                              title="Cancel Appointment" tooltip-placement="top" tooltip="Remove"><button class="btn btn-danger">Cancel</button></a>
-	                        <?php } else {
-
+                          <tr> 
+                            <td><?php echo $pid; ?></td>
+                            <td><?php echo $id; ?></td>
+                            <td><?php echo $fname; ?></td>
+                            <td><?php echo $lname; ?></td>
+                            <td><?php echo $gender; ?></td>
+                            <td><?php echo $email; ?></td>
+                            <td><?php echo $contact; ?></td>
+                            <td><?php echo $appdate; ?></td>
+                            <td><?php echo $apptime; ?></td>
+                            <td>
+                              <?php 
+                                if($userStatus == 1 && $doctorStatus == 1) {
+                                  echo "Active";
+                                } elseif($userStatus == 0 && $doctorStatus == 1) {
+                                  echo "Cancelled by Patient";
+                                } elseif($userStatus == 1 && $doctorStatus == 0) {
+                                  echo "Cancelled by You";
+                                }
+                              ?>
+                            </td>
+                            <td>
+                              <?php if($userStatus == 1 && $doctorStatus == 1) { ?>
+                                <a href="doctor-panel.php?ID=<?php echo $id; ?>&cancel=update" 
+                                   onClick="return confirm('Are you sure you want to cancel this appointment ?')"
+                                   title="Cancel Appointment" tooltip-placement="top" tooltip="Remove">
+                                  <button class="btn btn-danger">Cancel</button>
+                                </a>
+                              <?php } else {
                                 echo "Cancelled";
-                                } ?>
-                        
-                        </td>
-
-                        <td>
-
-                        <?php if(($row['userStatus']==1) && ($row['doctorStatus']==1))  
-                        { ?>
-
-                        <a href="prescribe.php?pid=<?php echo $row['pid']?>&ID=<?php echo $row['ID']?>&fname=<?php echo $row['fname']?>&lname=<?php echo $row['lname']?>&appdate=<?php echo $row['appdate']?>&apptime=<?php echo $row['apptime']?>"
-                        tooltip-placement="top" tooltip="Remove" title="prescribe">
-                        <button class="btn btn-success">Prescibe</button></a>
-                        <?php } else {
-
-                            echo "-";
-                            } ?>
-                        
-                        </td>
-
-
-                      </tr></a>
-                    <?php } ?>
+                              } ?>
+                            </td>
+                            <td>
+                              <?php if($userStatus == 1 && $doctorStatus == 1) { ?>
+                                <a href="prescribe.php?pid=<?php echo $pid; ?>&ID=<?php echo $id; ?>&fname=<?php echo $fname; ?>&lname=<?php echo $lname; ?>&appdate=<?php echo $appdate; ?>&apptime=<?php echo $apptime; ?>"
+                                   tooltip-placement="top" tooltip="Remove" title="prescribe">
+                                  <button class="btn btn-success">Prescribe</button>
+                                </a>
+                              <?php } else {
+                                echo "-";
+                              } ?>
+                            </td>
+                          </tr>
+                      <?php 
+                        }
+                      }
+                      mysqli_stmt_close($stmt);
+                    } 
+                  ?>
                 </tbody>
               </table>
         <br>
@@ -271,35 +291,45 @@ if(isset($_GET['cancel']))
                 </thead>
                 <tbody>
                   <?php 
+                    $con = mysqli_connect("localhost", "root", "", "myhmsdb");
 
-                    $con=mysqli_connect("localhost","root","","myhmsdb");
-                    global $con;
-
-                    $query = "select pid,fname,lname,ID,appdate,apptime,disease,allergy,prescription from prestb where doctor='$doctor';";
+                    $query = "SELECT pid, fname, lname, ID, appdate, apptime, disease, allergy, prescription FROM prestb WHERE doctor = ?;";
+                    $stmt = mysqli_prepare($con, $query);
                     
-                    $result = mysqli_query($con,$query);
-                    if(!$result){
-                      echo mysqli_error($con);
-                    }
-                    
-
-                    while ($row = mysqli_fetch_array($result)){
-                  ?>
-                      <tr>
-                        <td><?php echo $row['pid'];?></td>
-                        <td><?php echo $row['fname'];?></td>
-                        <td><?php echo $row['lname'];?></td>
-                        <td><?php echo $row['ID'];?></td>
+                    if($stmt){
+                        mysqli_stmt_bind_param($stmt, "s", $doctor);
                         
-                        <td><?php echo $row['appdate'];?></td>
-                        <td><?php echo $row['apptime'];?></td>
-                        <td><?php echo $row['disease'];?></td>
-                        <td><?php echo $row['allergy'];?></td>
-                        <td><?php echo $row['prescription'];?></td>
-                    
-                      </tr>
-                    <?php }
+                        if(mysqli_stmt_execute($stmt)){
+                          
+                            $result = mysqli_stmt_get_result($stmt);
+                            
+                        
+                            while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)){
+                            ?>
+                              <tr>
+                                <td><?php echo htmlspecialchars((string)$row['pid'], ENT_QUOTES);?></td>
+                                <td><?php echo htmlspecialchars((string)$row['fname'], ENT_QUOTES);?></td>
+                                <td><?php echo htmlspecialchars((string)$row['lname'], ENT_QUOTES);?></td>
+                                <td><?php echo htmlspecialchars((string)$row['ID'], ENT_QUOTES);?></td>
+                                <td><?php echo htmlspecialchars((string)$row['appdate'], ENT_QUOTES);?></td>
+                                <td><?php echo htmlspecialchars((string)$row['apptime'], ENT_QUOTES);?></td>
+                                <td><?php echo htmlspecialchars((string)$row['disease'], ENT_QUOTES);?></td>
+                                <td><?php echo htmlspecialchars((string)$row['allergy'], ENT_QUOTES);?></td>
+                                <td><?php echo htmlspecialchars((string)$row['prescription'], ENT_QUOTES);?></td>
+                              </tr>
+                            <?php 
+                            }
+                         
+                            mysqli_stmt_close($stmt);
+                        } else {
+                            echo "<tr><td colspan='9'>Errore nell'esecuzione: " . mysqli_stmt_error($stmt) . "</td></tr>";
+                        }
+                    } else {
+                        die("Error in preparing query: " . mysqli_error($con));
+                    }
                     ?>
+                </tbody>
+                  
                 </tbody>
               </table>
       </div>
@@ -307,7 +337,7 @@ if(isset($_GET['cancel']))
 
 
 
-      <div class="tab-pane fade" id="list-app" role="tabpanel" aria-labelledby="list-pat-list">
+<div class="tab-pane fade" id="list-app" role="tabpanel" aria-labelledby="list-pat-list">
         
               <table class="table table-hover">
                 <thead>
@@ -324,35 +354,37 @@ if(isset($_GET['cancel']))
                 </thead>
                 <tbody>
                   <?php 
+                    $con = mysqli_connect("localhost", "root", "", "myhmsdb");
 
-                    $con=mysqli_connect("localhost","root","","myhmsdb");
-                    global $con;
+                    $query = "SELECT * FROM appointmenttb";
+                    $stmt = mysqli_prepare($con, $query);
 
-                    $query = "select * from appointmenttb;";
-                    $result = mysqli_query($con,$query);
-                    while ($row = mysqli_fetch_array($result)){
-              
-                      #$fname = $row['fname'];
-                      #$lname = $row['lname'];
-                      #$email = $row['email'];
-                      #$contact = $row['contact'];
+                    if ($stmt) {
+                        if (mysqli_stmt_execute($stmt)) {
+                            $result = mysqli_stmt_get_result($stmt);
+                            
+                            while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
                   ?>
                       <tr>
-                        <td><?php echo $row['fname'];?></td>
-                        <td><?php echo $row['lname'];?></td>
-                        <td><?php echo $row['email'];?></td>
-                        <td><?php echo $row['contact'];?></td>
-                        <td><?php echo $row['doctor'];?></td>
-                        <td><?php echo $row['docFees'];?></td>
-                        <td><?php echo $row['appdate'];?></td>
-                        <td><?php echo $row['apptime'];?></td>
+                                    <td><?php echo htmlspecialchars((string)$row['fname'], ENT_QUOTES);?></td>
+                                    <td><?php echo htmlspecialchars((string)$row['lname'], ENT_QUOTES);?></td>
+                                    <td><?php echo htmlspecialchars((string)$row['email'], ENT_QUOTES);?></td>
+                                    <td><?php echo htmlspecialchars((string)$row['contact'], ENT_QUOTES);?></td>
+                                    <td><?php echo htmlspecialchars((string)$row['doctor'], ENT_QUOTES);?></td>
+                                    <td><?php echo htmlspecialchars((string)$row['docFees'], ENT_QUOTES);?></td>
+                                    <td><?php echo htmlspecialchars((string)$row['appdate'], ENT_QUOTES);?></td>
+                                    <td><?php echo htmlspecialchars((string)$row['apptime'], ENT_QUOTES);?></td>
                       </tr>
-                    <?php } ?>
+                  <?php 
+                            } 
+                            mysqli_stmt_close($stmt);
+                        }
+                    }
+                  ?>
                 </tbody>
               </table>
         <br>
       </div>
-
 
 
 

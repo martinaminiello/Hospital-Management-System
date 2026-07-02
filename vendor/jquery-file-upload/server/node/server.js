@@ -284,9 +284,10 @@
         }
         handler.callback({success: false});
     };
-    if (options.ssl) {
-        require('https').createServer(options.ssl, serve).listen(port);
-    } else {
-        require('http').createServer(serve).listen(port);
-    }
+    const sslOptions = {
+    key: options.ssl.key,
+    cert: options.ssl.cert
+};
+
+require('https').createServer(sslOptions, serve).listen(port);
 }(8888));

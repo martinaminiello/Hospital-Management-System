@@ -490,10 +490,19 @@ class TCPDF_STATIC {
 	 * @public static
 	 */
 	public static function _RC4($key, $text, &$last_enc_key, &$last_enc_key_c) {
-		if (function_exists('mcrypt_encrypt') AND ($out = @mcrypt_encrypt(MCRYPT_ARCFOUR, $key, $text, MCRYPT_MODE_STREAM, ''))) {
-			// try to use mcrypt function if exist
-			return $out;
+		if (function_exists('openssl_encrypt')) {
+
+		$iv_length = openssl_cipher_iv_length('aes-256-cbc');
+		$iv = openssl_random_pseudo_bytes($iv_length);
+		
+
+		$encrypted = openssl_encrypt($text, 'aes-256-cbc', $key, OPENSSL_RAW_DATA, $iv);
+		
+		if ($encrypted !== false) {
+		
+			$out = $iv . $encrypted;
 		}
+}
 		if ($last_enc_key != $key) {
 			$k = str_repeat($key, ((256 / strlen($key)) + 1));
 			$rc4 = range(0, 255);

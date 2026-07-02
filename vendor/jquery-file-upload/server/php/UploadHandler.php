@@ -1113,7 +1113,7 @@ class UploadHandler
     }
 
     protected function body($str) {
-        echo $str;
+        echo htmlspecialchars($str, ENT_QUOTES);
     }
     
     protected function header($str) {
@@ -1355,7 +1355,9 @@ class UploadHandler
         }
         $response = array();
         foreach($file_names as $file_name) {
-            $file_path = $this->get_upload_path($file_name);
+            $safe_file_name = basename($file_name);
+
+            $file_path = $this->get_upload_path($safe_file_name);
             $success = is_file($file_path) && $file_name[0] !== '.' && unlink($file_path);
             if ($success) {
                 foreach($this->options['image_versions'] as $version => $options) {

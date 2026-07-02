@@ -4,36 +4,65 @@ $con=mysqli_connect("localhost","root","","myhmsdb");
 if(isset($_POST['patsub'])){
 	$email=$_POST['email'];
 	$password=$_POST['password2'];
-	$query="select * from patreg where email='$email' and password='$password';";
-	$result=mysqli_query($con,$query);
-	if(mysqli_num_rows($result)==1)
-	{
-		while($row=mysqli_fetch_array($result,MYSQLI_ASSOC)){
-      $_SESSION['pid'] = $row['pid'];
-      $_SESSION['username'] = $row['fname']." ".$row['lname'];
-      $_SESSION['fname'] = $row['fname'];
-      $_SESSION['lname'] = $row['lname'];
-      $_SESSION['gender'] = $row['gender'];
-      $_SESSION['contact'] = $row['contact'];
-      $_SESSION['email'] = $row['email'];
+	$query = "SELECT * FROM patreg WHERE email = ? AND password = ?";
+  $stmt = mysqli_prepare($con, $query);
+
+
+    if ($stmt) {
+
+        mysqli_stmt_bind_param($stmt, "ss", $email, $password);
+
+
+        mysqli_stmt_execute($stmt);
+
+
+        $result = mysqli_stmt_get_result($stmt);
+          if (mysqli_num_rows($result) == 1) {
+            while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+                $_SESSION['pid'] = $row['pid'];
+                $_SESSION['username'] = $row['fname'] . " " . $row['lname'];
+                $_SESSION['fname'] = $row['fname'];
+                $_SESSION['lname'] = $row['lname'];
+                $_SESSION['gender'] = $row['gender'];
+                $_SESSION['contact'] = $row['contact'];
+                $_SESSION['email'] = $row['email'];
+            }
+         
+            mysqli_stmt_close($stmt);
+            header("Location:admin-panel.php");
+            exit(); 
+        } else {
+            mysqli_stmt_close($stmt);
+            echo("<script>alert('Invalid Username or Password. Try Again!');
+                  window.location.href = 'index1.php';</script>");
+        }
+    } else {
+       
+        die("Error in preparing query: " . mysqli_error($con));
     }
-		header("Location:admin-panel.php");
-	}
-  else {
-    echo("<script>alert('Invalid Username or Password. Try Again!');
-          window.location.href = 'index1.php';</script>");
-    // header("Location:error.php");
-  }
-		
 }
+
 if(isset($_POST['update_data']))
 {
-	$contact=$_POST['contact'];
-	$status=$_POST['status'];
-	$query="update appointmenttb set payment='$status' where contact='$contact';";
-	$result=mysqli_query($con,$query);
-	if($result)
-		header("Location:updated.php");
+	$contact = $_POST['contact'];
+  $status = $_POST['status']; //int
+  $query = "UPDATE appointmenttb SET payment=? WHERE contact = ?;" ;
+
+  $stmt = mysqli_prepare($con, $query);
+  if($stmt){
+    mysqli_stmt_bind_param($stmt, "si", $status, $contact);
+    
+     if(mysqli_stmt_execute($stmt)){
+      mysqli_stmt_close($stmt);
+      header("Location:updated.php");
+      exit(); 
+    } else {
+      die("Error executing query: " . mysqli_stmt_error($stmt));
+    }
+  }
+  else {
+    die("Error in preparing query: " . mysqli_error($con));
+  }
 }
 
 
@@ -57,11 +86,26 @@ if(isset($_POST['doc_sub']))
 	$doctor=$_POST['doctor'];
   $dpassword=$_POST['dpassword'];
   $demail=$_POST['demail'];
-  $docFees=$_POST['docFees'];
-	$query="insert into doctb(username,password,email,docFees)values('$doctor','$dpassword','$demail','$docFees')";
-	$result=mysqli_query($con,$query);
-	if($result)
-		header("Location:adddoc.php");
+  $docFees=$_POST['docFees']; //int
+  $query = "INSERT INTO  doctb(username,password,email,docFees)VALUES( ?,?,?,?)" ;
+
+  $stmt = mysqli_prepare($con, $query);
+  if($stmt){
+    
+   mysqli_stmt_bind_param($stmt, "sssi", $doctor, $dpassword, $demail, $docFees);
+   if(mysqli_stmt_execute($stmt)){
+      mysqli_stmt_close($stmt);
+      header("Location:adddoc.php");
+      exit();
+   }
+
+
+  }
+  else {
+    die("Error in preparing query: " . mysqli_error($con));
+  }
+
+
 }
 function display_admin_panel(){
 	echo '<!DOCTYPE html>

@@ -10,28 +10,52 @@ if(isset($_POST['docsub']))
   $dpassword=$_POST['dpassword'];
   $demail=$_POST['demail'];
   $spec=$_POST['special'];
-  $docFees=$_POST['docFees'];
-  $query="insert into doctb(username,password,email,spec,docFees)values('$doctor','$dpassword','$demail','$spec','$docFees')";
-  $result=mysqli_query($con,$query);
-  if($result)
-    {
-      echo "<script>alert('Doctor added successfully!');</script>";
+  $docFees=$_POST['docFees']; //int
+  $query="INSERT into doctb(username,password,email,spec,docFees)VALUES(?,?,?,?,?)";
+
+ $stmt= mysqli_prepare($con, $query);
+
+ if($stmt){
+   mysqli_stmt_bind_param($stmt, "ssssi", $doctor, $dpassword, $demail, $spec, $docFees);
+
+   if(mysqli_stmt_execute($stmt)){
+      mysqli_stmt_close($stmt);
+       echo "<script>alert('Doctor added successfully!');window.location='admin-panel1.php';</script>";
+      exit();
+   } else {
+       echo "<script>alert('Insert error: " . mysqli_error($con) . "');</script>";
+   }
   }
-}
+  else {
+    die("Error in preparing query: " . mysqli_error($con));
+  }
+
+ }
+
+
+
 
 
 if(isset($_POST['docsub1']))
 {
   $demail=$_POST['demail'];
-  $query="delete from doctb where email='$demail';";
-  $result=mysqli_query($con,$query);
-  if($result)
-    {
-      echo "<script>alert('Doctor removed successfully!');</script>";
+  $query="DELETE from doctb where email=?;";
+   $stmt= mysqli_prepare($con, $query);
+   if($stmt){
+   mysqli_stmt_bind_param($stmt, "s", $demail);
+   if(mysqli_stmt_execute($stmt)){
+      mysqli_stmt_close($stmt);
+       echo "<script>alert('Doctor removed successfully!');window.location='admin-panel1.php';</script>";
+      exit();
+   }  else{
+    echo "<script>alert('Unable to delete!');window.location='admin-panel1.php'</script>";
   }
-  else{
-    echo "<script>alert('Unable to delete!');</script>";
+   
   }
+  else {
+    die("Error in preparing query: " . mysqli_error($con));
+  }
+
 }
 
 
@@ -71,8 +95,10 @@ if(isset($_POST['docsub1']))
 }
 
     function alphaOnly(event) {
-  var key = event.keyCode;
-  return ((key >= 65 && key <= 90) || key == 8 || key == 32);
+      console.log(event);
+  element.addEventListener('input', function(event) {
+    this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+  });
 };
   </script>
 
@@ -270,18 +296,18 @@ if(isset($_POST['docsub1']))
                     <th scope="col">Fees</th>
                   </tr>
                 </thead>
-                <tbody>
+  <tbody>
                   <?php 
-                    $con=mysqli_connect("localhost","root","","myhmsdb");
-                    global $con;
-                    $query = "select * from doctb";
-                    $result = mysqli_query($con,$query);
-                    while ($row = mysqli_fetch_array($result)){
-                      $username = $row['username'];
-                      $spec = $row['spec'];
-                      $email = $row['email'];
-                      $password = $row['password'];
-                      $docFees = $row['docFees'];
+                    $con = mysqli_connect("localhost", "root", "", "myhmsdb");
+                    $query = "select username, spec, email, password, docFees from doctb";
+                    $result = mysqli_query($con, $query);
+                    
+                    while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)){
+                      $username = htmlspecialchars((string)$row['username'], ENT_QUOTES);
+                      $spec = htmlspecialchars((string)$row['spec'], ENT_QUOTES);
+                      $email = htmlspecialchars((string)$row['email'], ENT_QUOTES);
+                      $password = htmlspecialchars((string)$row['password'], ENT_QUOTES);
+                      $docFees = htmlspecialchars((string)$row['docFees'], ENT_QUOTES);
                       
                       echo "<tr>
                         <td>$username</td>
@@ -291,7 +317,6 @@ if(isset($_POST['docsub1']))
                         <td>$docFees</td>
                       </tr>";
                     }
-
                   ?>
                 </tbody>
               </table>
@@ -328,13 +353,13 @@ if(isset($_POST['docsub1']))
                     $query = "select * from patreg";
                     $result = mysqli_query($con,$query);
                     while ($row = mysqli_fetch_array($result)){
-                      $pid = $row['pid'];
-                      $fname = $row['fname'];
-                      $lname = $row['lname'];
-                      $gender = $row['gender'];
-                      $email = $row['email'];
-                      $contact = $row['contact'];
-                      $password = $row['password'];
+                      $pid = htmlspecialchars((string)$row['pid'], ENT_QUOTES);
+                      $fname = htmlspecialchars((string)$row['fname'], ENT_QUOTES);
+                      $lname = htmlspecialchars((string)$row['lname'], ENT_QUOTES);
+                      $gender = htmlspecialchars((string)$row['gender'], ENT_QUOTES);
+                      $email = htmlspecialchars((string)$row['email'], ENT_QUOTES);
+                      $contact = htmlspecialchars((string)$row['contact'], ENT_QUOTES);
+                      $password = htmlspecialchars((string)$row['password'], ENT_QUOTES);
                       
                       echo "<tr>
                         <td>$pid</td>
@@ -384,16 +409,16 @@ if(isset($_POST['docsub1']))
                     $query = "select * from prestb";
                     $result = mysqli_query($con,$query);
                     while ($row = mysqli_fetch_array($result)){
-                      $doctor = $row['doctor'];
-                      $pid = $row['pid'];
-                      $ID = $row['ID'];
-                      $fname = $row['fname'];
-                      $lname = $row['lname'];
-                      $appdate = $row['appdate'];
-                      $apptime = $row['apptime'];
-                      $disease = $row['disease'];
-                      $allergy = $row['allergy'];
-                      $pres = $row['prescription'];
+                      $doctor = htmlspecialchars((string)$row['doctor'], ENT_QUOTES);
+                      $pid = htmlspecialchars((string)$row['pid'], ENT_QUOTES);
+                      $ID = htmlspecialchars((string)$row['ID'], ENT_QUOTES);
+                      $fname = htmlspecialchars((string)$row['fname'], ENT_QUOTES);
+                      $lname = htmlspecialchars((string)$row['lname'], ENT_QUOTES);
+                      $appdate = htmlspecialchars((string)$row['appdate'], ENT_QUOTES);
+                      $apptime = htmlspecialchars((string)$row['apptime'], ENT_QUOTES);
+                      $disease = htmlspecialchars((string)$row['disease'], ENT_QUOTES);
+                      $allergy = htmlspecialchars((string)$row['allergy'], ENT_QUOTES);
+                      $pres = htmlspecialchars((string)$row['pres'], ENT_QUOTES);
 
                       
                       echo "<tr>
@@ -459,17 +484,18 @@ if(isset($_POST['docsub1']))
                     while ($row = mysqli_fetch_array($result)){
                   ?>
                       <tr>
-                        <td><?php echo $row['ID'];?></td>
-                        <td><?php echo $row['pid'];?></td>
-                        <td><?php echo $row['fname'];?></td>
-                        <td><?php echo $row['lname'];?></td>
-                        <td><?php echo $row['gender'];?></td>
-                        <td><?php echo $row['email'];?></td>
-                        <td><?php echo $row['contact'];?></td>
-                        <td><?php echo $row['doctor'];?></td>
-                        <td><?php echo $row['docFees'];?></td>
-                        <td><?php echo $row['appdate'];?></td>
-                        <td><?php echo $row['apptime'];?></td>
+                        <td><?php echo htmlspecialchars((string)$row['ID'],ENT_QUOTES);?></td>
+                        <td><?php echo htmlspecialchars((string)$row['pid'],ENT_QUOTES);?></td>
+                        <td><?php echo htmlspecialchars((string)$row['fname'],ENT_QUOTES);?></td>
+                        <td><?php echo htmlspecialchars((string)$row['lname'],ENT_QUOTES);?></td>
+                        <td><?php echo htmlspecialchars((string)$row['gender'],ENT_QUOTES);?></td>
+                        <td><?php echo htmlspecialchars((string)$row['email'],ENT_QUOTES);?></td>
+                        <td><?php echo htmlspecialchars((string)$row['contact'],ENT_QUOTES);?></td>
+                        <td><?php echo htmlspecialchars((string)$row['doctor'],ENT_QUOTES);?></td>
+                        <td><?php echo htmlspecialchars((string)$row['docFees'],ENT_QUOTES);?></td>
+                        <td><?php echo htmlspecialchars((string)$row['appdate'],ENT_QUOTES);?></td>
+                        <td><?php echo htmlspecialchars((string)$row['apptime'],ENT_QUOTES);?></td>
+              
                         <td>
                     <?php if(($row['userStatus']==1) && ($row['doctorStatus']==1))  
                     {
@@ -574,10 +600,11 @@ if(isset($_POST['docsub1']))
                       #$contact = $row['contact'];
                   ?>
                       <tr>
-                        <td><?php echo $row['name'];?></td>
-                        <td><?php echo $row['email'];?></td>
-                        <td><?php echo $row['contact'];?></td>
-                        <td><?php echo $row['message'];?></td>
+                  
+                        <td><?php echo  htmlspecialchars((string)$row['name'],ENT_QUOTES);?></td>
+                        <td><?php echo  htmlspecialchars((string)$row['email'],ENT_QUOTES);?></td>
+                        <td><?php echo  htmlspecialchars((string)$row['contact'],ENT_QUOTES);?></td>
+                        <td><?php echo  htmlspecialchars((string)$row['message'],ENT_QUOTES);?></td>
                       </tr>
                     <?php } ?>
                 </tbody>
