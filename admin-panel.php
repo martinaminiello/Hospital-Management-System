@@ -1,12 +1,17 @@
 
 <?php 
-include('func.php');  
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+include('func.php');
+include_once('csrf_token.php');
 
 if (!isset($_SESSION['pid'])) {
     header('Location: index1.php');
     exit();
 }
 
+initializeCSRFToken();
 include('newfunc.php');
 $con = mysqli_connect("localhost", "root", "", "myhmsdb");
 
@@ -21,6 +26,8 @@ $contact = $_SESSION['contact'];
 // --- 1. PRENOTAZIONE APPUNTAMENTO (POST) ---
 if(isset($_POST['app-submit']))
 {
+  requireValidCSRFToken();
+  
   $doctor = $_POST['doctor'];
   $docFees = $_POST['docFees'];
   $appdate = $_POST['appdate'];
@@ -468,6 +475,7 @@ function get_specs(){
                   </div><br><br>
 
                   <div class="col-md-4">
+                    <?php echo getCSRFTokenField(); ?>
                     <input type="submit" name="app-submit" value="Create new entry" class="btn btn-primary" id="inputbtn">
                   </div>
                   <div class="col-md-8"></div>                  
@@ -613,6 +621,7 @@ function get_specs(){
           <label>Doctors name: </label>
           <input type="text" name="name" placeholder="Enter doctors name" class="form-control">
           <br>
+          <?php echo getCSRFTokenField(); ?>
           <input type="submit" name="doc_sub" value="Add Doctor" class="btn btn-primary">
         </form>
       </div>

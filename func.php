@@ -116,6 +116,13 @@ if(isset($_POST['doc_sub']))
 		die("Security validation failed. Request rejected.");
 	}
 	
+	// Validate path traversal
+	$raw_name = strip_tags($_POST['doctor']);
+	if (strpbrk($raw_name, './\\') !== false) {
+		http_response_code(400);
+		die("Invalid input.");
+	}
+	
 	$doctor=$_POST['doctor'];
   $dpassword=$_POST['dpassword'];
   $demail=$_POST['demail'];
