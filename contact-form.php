@@ -53,19 +53,12 @@ initializeCSRFToken();
           </li>
 
           <li class="nav-item">
-            <a class="nav-link js-scroll-trigger" href="contact.html" style="color: white;font-family: 'IBM Plex Sans', sans-serif;"><h6>CONTACT</h6></a>
+            <a class="nav-link js-scroll-trigger" href="contact-form.php" style="color: white;font-family: 'IBM Plex Sans', sans-serif;"><h6>CONTACT</h6></a>
           </li>
         </ul>
       </div>
     </div>
   </nav>
-
-
-
-
-
-
-
 
     <div class="container contact-form" style="font-family: 'IBM Plex Sans', sans-serif;">
             <div class="contact-image">
@@ -100,6 +93,3 @@ initializeCSRFToken();
 
 </body>
 </html>
-
-
-

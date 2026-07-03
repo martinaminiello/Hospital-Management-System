@@ -1,17 +1,21 @@
 <?php
- session_set_cookie_params([
-    'lifetime' => 0,         
-    'path' => '/',            
-    'domain' => '',           
-    'secure' => false,        
-    'httponly' => true,       
-    'samesite' => 'Lax'       
-]);
+
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
+
+// Include CSRF token protection
+require_once('csrf_token.php');
+initializeCSRFToken();
+
 $con=mysqli_connect("localhost","root","","myhmsdb");
 if(isset($_POST['patsub'])){
+	// Validate CSRF token
+	if (!validateCSRFToken()) {
+		echo("<script>alert('Security validation failed. Please try again.');
+		      window.location.href = 'index1.php';</script>");
+		exit();
+	}
 	$email=$_POST['email'];
 	$password=$_POST['password2'];
 	$query = "SELECT * FROM patreg WHERE email = ? AND password = ?";
@@ -54,6 +58,11 @@ if(isset($_POST['patsub'])){
 
 if(isset($_POST['update_data']))
 {
+	// Validate CSRF token
+	if (!validateCSRFToken()) {
+		die("Security validation failed. Request rejected.");
+	}
+	
 	$contact = $_POST['contact'];
   $status = $_POST['status']; //int
   $query = "UPDATE appointmenttb SET payment=? WHERE contact = ?;" ;
@@ -93,6 +102,11 @@ if(isset($_POST['update_data']))
 
 if(isset($_POST['doc_sub']))
 {
+	// Validate CSRF token
+	if (!validateCSRFToken()) {
+		die("Security validation failed. Request rejected.");
+	}
+	
 	$doctor=$_POST['doctor'];
   $dpassword=$_POST['dpassword'];
   $demail=$_POST['demail'];

@@ -1,20 +1,25 @@
 <?php
 
- session_set_cookie_params([
-    'lifetime' => 0,         
-    'path' => '/',            
-    'domain' => '',           
-    'secure' => false,        
-    'httponly' => true,       
-    'samesite' => 'Lax'       
-]);
+
 
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
+
+// Include CSRF token protection
+require_once('csrf_token.php');
+initializeCSRFToken();
+
 $con = mysqli_connect("localhost", "root", "", "myhmsdb");
 
 if(isset($_POST['docsub1'])){
+  // Validate CSRF token
+  if (!validateCSRFToken()) {
+    echo("<script>alert('Security validation failed. Please try again.');
+          window.location.href = 'index.php';</script>");
+    exit();
+  }
+  
   $dname = $_POST['username3'];
   $dpass = $_POST['password3'];
   

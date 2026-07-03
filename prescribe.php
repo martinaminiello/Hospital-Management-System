@@ -6,14 +6,7 @@ error_reporting(E_ALL);
 
 include('func1.php');
 
- session_set_cookie_params([
-    'lifetime' => 0,         
-    'path' => '/',            
-    'domain' => '',           
-    'secure' => false,        
-    'httponly' => true,       
-    'samesite' => 'Lax'       
-]);
+
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }

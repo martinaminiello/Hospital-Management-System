@@ -1,15 +1,13 @@
 <?php
- session_set_cookie_params([
-    'lifetime' => 0,         
-    'path' => '/',            
-    'domain' => '',           
-    'secure' => false,        
-    'httponly' => true,       
-    'samesite' => 'Lax'       
-]);
+
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
+
+// Include CSRF token protection
+require_once('csrf_token.php');
+initializeCSRFToken();
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -20,6 +18,13 @@ if (!$con) {
 }
 
 if(isset($_POST['adsub'])){
+    // Validate CSRF token
+    if (!validateCSRFToken()) {
+      echo("<script>alert('Security validation failed. Please try again.');
+            window.location.href = 'index.php';</script>");
+      exit();
+    }
+    
     $username = $_POST['username1'];
     $password = $_POST['password2'];
     

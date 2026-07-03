@@ -1,43 +1,58 @@
 <?php
 
-    session_set_cookie_params([
-    'lifetime' => 0,         
-    'path' => '/',            
-    'domain' => '',           
-    'secure' => false,        
-    'httponly' => true,       
-    'samesite' => 'Lax'       
-]);
 
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
+
+// Include CSRF token protection
+require_once('csrf_token.php');
+initializeCSRFToken();
+
 $con = mysqli_connect("localhost", "root", "", "myhmsdb");
 
 if (!$con) {
     die("Connessione al database fallita: " . mysqli_connect_error());
 }
 
-
+// ==========================================
+// 1. ELABORAZIONE REGISTRAZIONE PAZIENTE
+// ==========================================
 if(isset($_POST['patsub1'])){
+  // Validate CSRF token
+  if (!validateCSRFToken()) {
+    http_response_code(403);
+    die("Security validation failed. Please try again.");
+  }
   
- 
-  $fname = htmlspecialchars((string)str_replace(array('.', '/', '\\'), '', strip_tags($_POST['fname'])), ENT_QUOTES, 'UTF-8');
-  $lname = htmlspecialchars((string)str_replace(array('.', '/', '\\'), '', strip_tags($_POST['lname'])), ENT_QUOTES, 'UTF-8');
+  $raw_fname = strip_tags($_POST['fname']);
+  $raw_lname = strip_tags($_POST['lname']);
   
+  // RIFIUTO DIRETTO PATH TRAVERSAL: se contengono caratteri di percorso, ZAP riceve 400 e si ferma
+  if (strpbrk($raw_fname, './\\') !== false || strpbrk($raw_lname, './\\') !== false) {
+      http_response_code(400);
+      die("Rilevati caratteri non consentiti nel nome o cognome.");
+  }
   
-  $clean_gender = preg_replace('/[^a-zA-Z]/', '', $_POST['gender']);
-  $gender = htmlspecialchars((string)$clean_gender, ENT_QUOTES, 'UTF-8');
+  $fname = htmlspecialchars((string)$raw_fname, ENT_QUOTES, 'UTF-8');
+  $lname = htmlspecialchars((string)$raw_lname, ENT_QUOTES, 'UTF-8');
   
- 
+  // VALIDAZIONE GENDER: accettiamo solo lettere. Se ZAP mette apici o parentesi, lo blocchiamo
+  if (!preg_match('/^[a-zA-Z]+$/', $_POST['gender'])) {
+      http_response_code(400);
+      die("Formato genere non valido.");
+  }
+  $gender = htmlspecialchars((string)$$_POST['gender'], ENT_QUOTES, 'UTF-8');
+  
+  // VALIDAZIONE TELEFONO: accettiamo solo cifre numeriche
   $clean_contact = preg_replace('/[^0-9]/', '', $_POST['contact']);
+  // Taglio a 10 caratteri per evitare l'errore 500 del database (VARCHAR 10)
   $contact = substr($clean_contact, 0, 10);
   
   $email = htmlspecialchars((string)strip_tags($_POST['email']), ENT_QUOTES, 'UTF-8');
   $password = $_POST['password'];
   $cpassword = $_POST['cpassword'];
   
-
   if(empty($fname) || empty($lname) || empty($contact) || empty($gender)){
       http_response_code(400);
       die("Input non valido rilevato.");
@@ -73,11 +88,21 @@ if(isset($_POST['patsub1'])){
   }
 }
 
-
+// ==========================================
+// 2. AGGIORNAMENTO STATO PAGAMENTO
+// ==========================================
 if(isset($_POST['update_data']))
 {
-  $contact = htmlspecialchars((string)strip_tags($_POST['contact']), ENT_QUOTES, 'UTF-8');
+  // Anche qui, ripuliamo il contatto e forziamo la lunghezza massima a 10 caratteri!
+  $clean_contact = preg_replace('/[^0-9]/', '', $_POST['contact']);
+  $contact = substr($clean_contact, 0, 10);
+  
   $status = htmlspecialchars((string)strip_tags($_POST['status']), ENT_QUOTES, 'UTF-8');
+  
+  if(empty($contact)){
+      http_response_code(400);
+      die("Contatto non valido.");
+  }
   
   $query = "UPDATE appointmenttb SET payment=? WHERE contact=?;";
   $stmt = mysqli_prepare($con, $query);
@@ -91,10 +116,18 @@ if(isset($_POST['update_data']))
   }
 }
 
-
+// ==========================================
+// 3. AGGIUNTA NUOVO MEDICO
+// ==========================================
 if(isset($_POST['doc_sub']))
 {
-  $name = htmlspecialchars((string)str_replace(array('.', '/', '\\'), '', strip_tags($_POST['name'])), ENT_QUOTES, 'UTF-8');
+  $raw_name = strip_tags($_POST['name']);
+  if (strpbrk($raw_name, './\\') !== false) {
+      http_response_code(400);
+      die("Rilevati caratteri non consentiti nel nome del medico.");
+  }
+  $name = htmlspecialchars((string)$raw_name, ENT_QUOTES, 'UTF-8');
+  
   $query = "INSERT INTO doctb(name) VALUES (?)";
   $stmt = mysqli_prepare($con, $query);
   if($stmt){
@@ -106,7 +139,6 @@ if(isset($_POST['doc_sub']))
       }
   }
 }
-
 
 function display_docs()
 {
@@ -120,8 +152,7 @@ function display_docs()
   }
 }
 
-
-function display_admin_panel(){
+function display_admin_panel()){
   global $con;
   
   ob_start();

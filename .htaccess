@@ -1,1 +1,12 @@
+
 php_value session.cookie_httponly 1
+
+
+php_value session.cookie_samesite "Lax"
+
+
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header edit Set-Cookie ^(.*)$ "$1; HttpOnly; SameSite=Lax"
+</IfModule>

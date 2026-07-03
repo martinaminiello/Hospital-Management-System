@@ -2,6 +2,11 @@
 <head>
 	<title>HMS</title>
 	<link rel="shortcut icon" type="image/x-icon" href="images/favicon.png" />
+<?php
+session_start();
+require_once('csrf_token.php');
+initializeCSRFToken();
+?>
 <link rel="stylesheet" type="text/css" href="style1.css">
 <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans&display=swap" rel="stylesheet">
 <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous"> -->
@@ -67,7 +72,7 @@ function checklen()
           </li>
 
           <li class="nav-item">
-            <a class="nav-link js-scroll-trigger" href="contact.html" style="color: white;font-family: 'IBM Plex Sans', sans-serif;"><h6>CONTACT</h6></a>
+            <a class="nav-link js-scroll-trigger" href="contact-form.php" style="color: white;font-family: 'IBM Plex Sans', sans-serif;"><h6>CONTACT</h6></a>
           </li>
         </ul>
       </div>
@@ -99,6 +104,7 @@ function checklen()
                             <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
                                 <h3 class="register-heading">Register as Patient</h3>
                                 <form method="post" action="func2.php">
+                                <?php echo getCSRFTokenField(); ?>
                                 <div class="row register-form">
                                     
                                     <div class="col-md-6">
@@ -149,6 +155,7 @@ function checklen()
                             <div class="tab-pane fade show" id="profile" role="tabpanel" aria-labelledby="profile-tab">
                                 <h3  class="register-heading">Login as Doctor</h3>
                                 <form method="post" action="func1.php">
+                                <?php echo getCSRFTokenField(); ?>
                                 <div class="row register-form">
                                     <div class="col-md-6">
                                         <div class="form-group">
@@ -170,6 +177,7 @@ function checklen()
                             <div class="tab-pane fade show" id="admin" role="tabpanel" aria-labelledby="profile-tab">
                                 <h3  class="register-heading">Login as Admin</h3>
                                 <form method="post" action="func3.php">
+                                <?php echo getCSRFTokenField(); ?>
                                 <div class="row register-form">
                                     <div class="col-md-6">
                                         <div class="form-group">

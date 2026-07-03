@@ -1,4 +1,8 @@
  <?php 
+session_start();
+require_once('csrf_token.php');
+initializeCSRFToken();
+
 $con = mysqli_connect("localhost", "root", "", "myhmsdb");
 
 if (!$con) {
@@ -7,6 +11,20 @@ if (!$con) {
 
 if(isset($_POST['btnSubmit']))
 {
+    // Debug: check if token is in POST
+    if (empty($_POST['csrf_token'])) {
+        echo("<script>alert('CSRF token not found in form submission. Please reload the page.');
+              window.location.href = 'contact-form.php';</script>");
+        exit();
+    }
+    
+    // Validate CSRF token - NO reinitialize, just validate
+    if (!validateCSRFToken()) {
+        http_response_code(403);
+        echo("<script>alert('Security validation failed. Please try again.');
+              window.location.href = 'contact-form.php';</script>");
+        exit();
+    }
 
     $raw_name = strip_tags($_POST['txtName']);
     
@@ -41,7 +59,7 @@ if(isset($_POST['btnSubmit']))
             mysqli_stmt_close($stmt);
             echo '<script type="text/javascript">'; 
             echo 'alert("Message sent successfully!");'; 
-            echo 'window.location.href = "contact.html";';
+            echo 'window.location.href = "contact-form.php";';
             echo '</script>';
             exit();
         }

@@ -1,5 +1,8 @@
 <?php
 include("header.php");
+session_start();
+require_once('csrf_token.php');
+initializeCSRFToken();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -49,7 +52,7 @@ include("header.php");
           </li>
 
           <li class="nav-item">
-            <a class="nav-link js-scroll-trigger" href="contact.html" style="color: white;font-family: 'IBM Plex Sans', sans-serif;"><h6>CONTACT</h6></a>
+            <a class="nav-link js-scroll-trigger" href="contact-form.php" style="color: white;font-family: 'IBM Plex Sans', sans-serif;"><h6>CONTACT</h6></a>
           </li>
         </ul>
       </div>
@@ -83,6 +86,7 @@ include("header.php");
                 <br>
               <h3 style="margin-top: 10%">Patient Login</h3><br>
               <form class="form-group" method="POST" action="func.php">
+                <?php echo getCSRFTokenField(); ?>
                 <div class="row" style="margin-top: 10%">
                   <div class="col-md-4"><label>Email-ID: </label></div>
                   <div class="col-md-8"><input type="text" name="email" class="form-control" placeholder="enter email ID" required/></div><br><br>
@@ -97,7 +101,7 @@ include("header.php");
                 </div>
               </form>
             </center>
-            </div>
+            </div> 
           </div>
         </div>
 
