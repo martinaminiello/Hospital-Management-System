@@ -1,4 +1,6 @@
 <?php
+
+
 /**
  * CSRF Token Protection Helper
  * 

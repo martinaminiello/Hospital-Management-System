@@ -1,4 +1,6 @@
 <?php
+
+
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
@@ -10,8 +12,10 @@ initializeCSRFToken();
 $con = mysqli_connect("localhost", "root", "", "myhmsdb");
 
 
-function h($value) {
+if (!function_exists('h')) {
+  function h($value) {
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+  }
 }
 
 if(isset($_POST['docsub1'])){
@@ -25,16 +29,23 @@ if(isset($_POST['docsub1'])){
   $dname = $_POST['username3'];
   $dpass = $_POST['password3'];
   
-  $query = "select * from doctb where username=? and password=?;";
+  $query = "select * from doctb where username=?;";
   $stmt = mysqli_prepare($con, $query);
   if($stmt){
-    mysqli_stmt_bind_param($stmt, "ss", $dname, $dpass);
+    mysqli_stmt_bind_param($stmt, "s", $dname);
     if(mysqli_stmt_execute($stmt)){
       $result = mysqli_stmt_get_result($stmt);
       if(mysqli_num_rows($result) == 1)
       {
         while($row = mysqli_fetch_array($result, MYSQLI_ASSOC)){
-          $_SESSION['dname'] = $row['username'];
+          if (password_verify($dpass, $row['password'])) {
+            $_SESSION['dname'] = $row['username'];
+          } else {
+            mysqli_stmt_close($stmt);
+            echo("<script>alert('Invalid Username or Password. Try Again!');
+                  window.location.href = 'index.php';</script>");
+            exit();
+          }
         }
         mysqli_stmt_close($stmt);
         header("Location:doctor-panel.php");

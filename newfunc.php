@@ -1,4 +1,9 @@
 <?php
+if (basename(__FILE__) == basename($_SERVER['PHP_SELF'])) {
+    header($_SERVER['SERVER_PROTOCOL'] . ' 403 Forbidden');
+    exit();
+}
+
 // session_start();
 $con = mysqli_connect("localhost", "root", "", "myhmsdb");
 

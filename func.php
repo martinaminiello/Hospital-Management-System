@@ -1,5 +1,7 @@
 <?php
 
+
+
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
@@ -18,13 +20,13 @@ if(isset($_POST['patsub'])){
 	}
 	$email=$_POST['email'];
 	$password=$_POST['password2'];
-	$query = "SELECT * FROM patreg WHERE email = ? AND password = ?";
+	$query = "SELECT * FROM patreg WHERE email = ?";
   $stmt = mysqli_prepare($con, $query);
 
 
     if ($stmt) {
 
-        mysqli_stmt_bind_param($stmt, "ss", $email, $password);
+        mysqli_stmt_bind_param($stmt, "s", $email);
 
 
         mysqli_stmt_execute($stmt);
@@ -33,13 +35,20 @@ if(isset($_POST['patsub'])){
         $result = mysqli_stmt_get_result($stmt);
           if (mysqli_num_rows($result) == 1) {
             while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
-                $_SESSION['pid'] = $row['pid'];
-                $_SESSION['username'] = $row['fname'] . " " . $row['lname'];
-                $_SESSION['fname'] = $row['fname'];
-                $_SESSION['lname'] = $row['lname'];
-                $_SESSION['gender'] = $row['gender'];
-                $_SESSION['contact'] = $row['contact'];
-                $_SESSION['email'] = $row['email'];
+                if (password_verify($password, $row['password'])) {
+                    $_SESSION['pid'] = $row['pid'];
+                    $_SESSION['username'] = $row['fname'] . " " . $row['lname'];
+                    $_SESSION['fname'] = $row['fname'];
+                    $_SESSION['lname'] = $row['lname'];
+                    $_SESSION['gender'] = $row['gender'];
+                    $_SESSION['contact'] = $row['contact'];
+                    $_SESSION['email'] = $row['email'];
+                } else {
+                    mysqli_stmt_close($stmt);
+                    echo("<script>alert('Invalid Username or Password. Try Again!');
+                          window.location.href = 'index1.php';</script>");
+                    exit();
+                }
             }
          
             mysqli_stmt_close($stmt);
@@ -111,12 +120,13 @@ if(isset($_POST['doc_sub']))
   $dpassword=$_POST['dpassword'];
   $demail=$_POST['demail'];
   $docFees=$_POST['docFees']; //int
+  $dpassword_hashed = password_hash($dpassword, PASSWORD_BCRYPT);
   $query = "INSERT INTO  doctb(username,password,email,docFees)VALUES( ?,?,?,?)" ;
 
   $stmt = mysqli_prepare($con, $query);
   if($stmt){
     
-   mysqli_stmt_bind_param($stmt, "sssi", $doctor, $dpassword, $demail, $docFees);
+   mysqli_stmt_bind_param($stmt, "sssi", $doctor, $dpassword_hashed, $demail, $docFees);
    if(mysqli_stmt_execute($stmt)){
       mysqli_stmt_close($stmt);
       header("Location:adddoc.php");

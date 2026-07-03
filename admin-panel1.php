@@ -1,5 +1,9 @@
-<!DOCTYPE html>
 <?php 
+// 1. FORZA PHP A MOSTRARE GLI ERRORE INVECE DELLA PAGINA BIANCA
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
@@ -10,12 +14,17 @@ if (!isset($_SESSION['username'])) {
 }
 
 $con = mysqli_connect("localhost", "root", "", "myhmsdb");
+if (!$con) {
+    die("Connessione al database fallita: " . mysqli_connect_error());
+}
 
-include('newfunc.php');
+// Nota: Assicurati che newfunc.php non contenga funzioni duplicate o output testuali prima del dovuto
+include_once('newfunc.php');
 
-
-function h($value) {
-    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+if (!function_exists('h')) {
+    function h($value) {
+        return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+    }
 }
 
 if(isset($_POST['docsub']))
@@ -24,20 +33,20 @@ if(isset($_POST['docsub']))
   $dpassword = $_POST['dpassword'];
   $demail = $_POST['demail'];
   $spec = $_POST['special'];
-  $docFees = $_POST['docFees']; // int
+  $docFees = $_POST['docFees']; 
+  $dpassword_hashed = password_hash($dpassword, PASSWORD_BCRYPT);
   
-  $query = "INSERT into doctb(username,password,email,spec,docFees)VALUES(?,?,?,?,?)";
+  $query = "INSERT into doctb(username,password,email,spec,docFees) VALUES(?,?,?,?,?)";
   $stmt = mysqli_prepare($con, $query);
 
   if($stmt){
-   mysqli_stmt_bind_param($stmt, "ssssi", $doctor, $dpassword, $demail, $spec, $docFees);
+   mysqli_stmt_bind_param($stmt, "ssssi", $doctor, $dpassword_hashed, $demail, $spec, $docFees);
 
    if(mysqli_stmt_execute($stmt)){
       mysqli_stmt_close($stmt);
       echo "<script>alert('Doctor added successfully!');window.location='admin-panel1.php';</script>";
       exit();
    } else {
-     
        echo "<script>alert('Insert error: " . h(mysqli_error($con)) . "');</script>";
    }
   }
@@ -67,6 +76,7 @@ if(isset($_POST['docsub1']))
   }
 }
 ?>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -74,12 +84,10 @@ if(isset($_POST['docsub1']))
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" type="text/css" href="font-awesome-4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="vendor/fontawesome/css/font-awesome.min.css">
     <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
     
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
-      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
       <a class="navbar-brand" href="#"><i class="fa fa-user-plus" aria-hidden="true"></i> Global Hospital </a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -97,7 +105,6 @@ if(isset($_POST['docsub1']))
         }
 
         function alphaOnly(event) {
-          console.log(event);
           element.addEventListener('input', function(event) {
             this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
           });
@@ -119,18 +126,10 @@ if(isset($_POST['docsub1']))
            <li class="nav-item">
             <a class="nav-link" href="logout1.php"><i class="fa fa-sign-out" aria-hidden="true"></i>Logout</a>
           </li>
-           <li class="nav-item">
-            <a class="nav-link" href="#"></a>
-          </li>
         </ul>
       </div>
     </nav>
   </head>
-  
-  <style type="text/css">
-    button:hover{cursor:pointer;}
-    #inputbtn:hover{cursor:pointer;}
-  </style>
   
   <body style="padding-top:50px;">
    <div class="container-fluid" style="margin-top:50px;">
@@ -247,23 +246,23 @@ if(isset($_POST['docsub1']))
               </thead>
               <tbody>
                 <?php 
-                  $con = mysqli_connect("localhost", "root", "", "myhmsdb");
-                  $query = "select username, spec, email, password, docFees from doctb";
-                  $result = mysqli_query($con, $query);
+                  $query_doc = "select username, spec, email, docFees from doctb";
+                  $result_doc = mysqli_query($con, $query_doc);
                   
-                  while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)){
-                    // SANIFICATO CON h() PER CORREGGERE L'AVVISO DI FORTIFY
-                    $username = h((string)$row['username']);
-                    $spec = h((string)$row['spec']);
-                    $email = h((string)$row['email']);
-                    $docFees = h((string)$row['docFees']);
-                    
-                    echo "<tr>
-                      <td>$username</td>
-                      <td>$spec</td>
-                      <td>$email</td>
-                      <td>$docFees</td>
-                    </tr>";
+                  if($result_doc){
+                    while ($row = mysqli_fetch_array($result_doc, MYSQLI_ASSOC)){
+                      $doc_username = isset($row['username']) ? h($row['username']) : '';
+                      $doc_spec = isset($row['spec']) ? h($row['spec']) : '';
+                      $doc_email = isset($row['email']) ? h($row['email']) : '';
+                      $doc_fees = isset($row['docFees']) ? h($row['docFees']) : '';
+                      
+                      echo "<tr>
+                        <td>$doc_username</td>
+                        <td>$doc_spec</td>
+                        <td>$doc_email</td>
+                        <td>$doc_fees</td>
+                      </tr>";
+                    }
                   }
                 ?>
               </tbody>
@@ -292,26 +291,26 @@ if(isset($_POST['docsub1']))
               </thead>
               <tbody>
                 <?php 
-                  $con=mysqli_connect("localhost","root","","myhmsdb");
-                  global $con;
-                  $query = "select * from patreg";
-                  $result = mysqli_query($con,$query);
-                  while ($row = mysqli_fetch_array($result)){
-                      $pid = h((int)$row['pid']);
-                      $fname = h((string)$row['fname']);
-                      $lname = h((string)$row['lname']);
-                      $gender = h((string)$row['gender']);
-                      $email = h((string)$row['email']);
-                      $contact = h((string)$row['contact']);
+                  $query_pat = "select * from patreg";
+                  $result_pat = mysqli_query($con, $query_pat);
+                  if($result_pat){
+                    while ($row = mysqli_fetch_array($result_pat, MYSQLI_ASSOC)){
+                        $pid = h($row['pid']);
+                        $fname = h($row['fname']);
+                        $lname = h($row['lname']);
+                        $gender = h($row['gender']);
+                        $email = h($row['email']);
+                        $contact = h($row['contact']);
 
-                      echo '<tr>' .
-                            '<td>' . $pid . '</td>' .
-                            '<td>' . $fname . '</td>' .
-                            '<td>' . $lname . '</td>' .
-                            '<td>' . $gender . '</td>' .
-                            '<td>' . $email . '</td>' .
-                            '<td>' . $contact . '</td>' .
-                            '</tr>';
+                        echo '<tr>' .
+                              '<td>' . $pid . '</td>' .
+                              '<td>' . $fname . '</td>' .
+                              '<td>' . $lname . '</td>' .
+                              '<td>' . $gender . '</td>' .
+                              '<td>' . $email . '</td>' .
+                              '<td>' . $contact . '</td>' .
+                              '</tr>';
+                    }
                   }
                 ?>
               </tbody>
@@ -319,59 +318,55 @@ if(isset($_POST['docsub1']))
           </div>
 
           <div class="tab-pane fade" id="list-pres" role="tabpanel" aria-labelledby="list-pres-list">
-            <div class="col-md-8">
-              <div class="row">
-                <table class="table table-hover">
-                  <thead>
-                    <tr>
-                      <th scope="col">Doctor</th>
-                      <th scope="col">Patient ID</th>
-                      <th scope="col">Appointment ID</th>
-                      <th scope="col">First Name</th>
-                      <th scope="col">Last Name</th>
-                      <th scope="col">Appointment Date</th>
-                      <th scope="col">Appointment Time</th>
-                      <th scope="col">Disease</th>
-                      <th scope="col">Allergy</th>
-                      <th scope="col">Prescription</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php 
-                      $con=mysqli_connect("localhost","root","","myhmsdb");
-                      global $con;
-                      $query = "select * from prestb";
-                      $result = mysqli_query($con,$query);
-                      while ($row = mysqli_fetch_array($result)){
-                        $doctor = h((string)$row['doctor']);
-                        $pid = h((int)$row['pid']);
-                        $ID = h((int)$row['ID']);
-                        $fname = h((string)$row['fname']);
-                        $lname = h((string)$row['lname']);
-                        $appdate = h((string)$row['appdate']);
-                        $apptime = h((string)$row['apptime']);
-                        $disease = h((string)$row['disease']);
-                        $allergy = h((string)$row['allergy']);
-                        $pres = h((string)$row['pres']);
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th scope="col">Doctor</th>
+                  <th scope="col">Patient ID</th>
+                  <th scope="col">Appointment ID</th>
+                  <th scope="col">First Name</th>
+                  <th scope="col">Last Name</th>
+                  <th scope="col">Appointment Date</th>
+                  <th scope="col">Appointment Time</th>
+                  <th scope="col">Disease</th>
+                  <th scope="col">Allergy</th>
+                  <th scope="col">Prescription</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php 
+                  $query_pres = "select * from prestb";
+                  $result_pres = mysqli_query($con, $query_pres);
+                  if($result_pres){
+                    while ($row = mysqli_fetch_array($result_pres, MYSQLI_ASSOC)){
+                      $doctor = h($row['doctor']);
+                      $pid = h($row['pid']);
+                      $ID = h($row['ID']);
+                      $fname = h($row['fname']);
+                      $lname = h($row['lname']);
+                      $appdate = h($row['appdate']);
+                      $apptime = h($row['apptime']);
+                      $disease = h($row['disease']);
+                      $allergy = h($row['allergy']);
+                      $pres = h($row['prescription'] ?? '');
 
-                        echo '<tr>' .
-                             '<td>' . $doctor . '</td>' .
-                             '<td>' . $pid . '</td>' .
-                             '<td>' . $ID . '</td>' .
-                             '<td>' . $fname . '</td>' .
-                             '<td>' . $lname . '</td>' .
-                             '<td>' . $appdate . '</td>' .
-                             '<td>' . $apptime . '</td>' .
-                             '<td>' . $disease . '</td>' .
-                             '<td>' . $allergy . '</td>' .
-                             '<td>' . $pres . '</td>' .
-                             '</tr>';
-                      }
-                    ?>
-                  </tbody>
-                </table><br>
-              </div>
-            </div>
+                      echo '<tr>' .
+                           '<td>' . $doctor . '</td>' .
+                           '<td>' . $pid . '</td>' .
+                           '<td>' . $ID . '</td>' .
+                           '<td>' . $fname . '</td>' .
+                           '<td>' . $lname . '</td>' .
+                           '<td>' . $appdate . '</td>' .
+                           '<td>' . $apptime . '</td>' .
+                           '<td>' . $disease . '</td>' .
+                           '<td>' . $allergy . '</td>' .
+                           '<td>' . $pres . '</td>' .
+                           '</tr>';
+                    }
+                  }
+                ?>
+              </tbody>
+            </table><br>
           </div>
 
           <div class="tab-pane fade" id="list-app" role="tabpanel" aria-labelledby="list-pat-list">
@@ -402,23 +397,21 @@ if(isset($_POST['docsub1']))
               </thead>
               <tbody>
                 <?php 
-                  $con=mysqli_connect("localhost","root","","myhmsdb");
-                  global $con;
-
-                  $query = "select * from appointmenttb;";
-                  $result = mysqli_query($con,$query);
-                  while ($row = mysqli_fetch_array($result)){
-                      $row_id = h((int)$row['ID']);
-                      $row_pid = h((int)$row['pid']);
-                      $row_fname = h((string)$row['fname']);
-                      $row_lname = h((string)$row['lname']);
-                      $row_gender = h((string)$row['gender']);
-                      $row_email = h((string)$row['email']);
-                      $row_contact = h((string)$row['contact']);
-                      $row_doctor = h((string)$row['doctor']);
-                      $row_docFees = h((string)$row['docFees']);
-                      $row_appdate = h((string)$row['appdate']);
-                      $row_apptime = h((string)$row['apptime']);
+                  $query_app = "select * from appointmenttb;";
+                  $result_app = mysqli_query($con, $query_app);
+                  if($result_app){
+                    while ($row = mysqli_fetch_array($result_app, MYSQLI_ASSOC)){
+                        $row_id = h($row['ID']);
+                        $row_pid = h($row['pid']);
+                        $row_fname = h($row['fname']);
+                        $row_lname = h($row['lname']);
+                        $row_gender = h($row['gender']);
+                        $row_email = h($row['email']);
+                        $row_contact = h($row['contact']);
+                        $row_doctor = h($row['doctor']);
+                        $row_docFees = h($row['docFees']);
+                        $row_appdate = h($row['appdate']);
+                        $row_apptime = h($row['apptime']);
                 ?>
                     <tr>
                       <td><?php echo $row_id;?></td>
@@ -445,26 +438,25 @@ if(isset($_POST['docsub1']))
                   }
                       ?></td>
                     </tr>
-                  <?php } ?>
+                  <?php } 
+                  } ?>
               </tbody>
             </table><br>
           </div>
-
-          <div class="tab-pane fade" id="list-messages" role="tabpanel" aria-labelledby="list-messages-list">...</div>
 
           <div class="tab-pane fade" id="list-settings" role="tabpanel" aria-labelledby="list-settings-list">
             <form class="form-group" method="post" action="admin-panel1.php">
               <div class="row">
                 <div class="col-md-4"><label>Doctor Name:</label></div>
-                <div class="col-md-8"><input type="text" class="form-control" name="doctor" onkeydown="return alphaOnly(event);" required></div><br><br>
+                <div class="col-md-8"><input type="text" class="form-control" name="doctor" required></div><br><br>
                 <div class="col-md-4"><label>Specialization:</label></div>
                 <div class="col-md-8">
                  <select name="special" class="form-control" id="special" required="required">
-                    <option value="head" name="spec" disabled selected>Select Specialization</option>
-                    <option value="General" name="spec">General</option>
-                    <option value="Cardiologist" name="spec">Cardiologist</option>
-                    <option value="Neurologist" name="spec">Neurologist</option>
-                    <option value="Pediatrician" name="spec">Pediatrician</option>
+                    <option value="" disabled selected>Select Specialization</option>
+                    <option value="General">General</option>
+                    <option value="Cardiologist">Cardiologist</option>
+                    <option value="Neurologist">Neurologist</option>
+                    <option value="Pediatrician">Pediatrician</option>
                   </select>
                 </div><br><br>
                 <div class="col-md-4"><label>Email ID:</label></div>
@@ -491,8 +483,6 @@ if(isset($_POST['docsub1']))
             </form>
           </div>
 
-          <div class="tab-pane fade" id="list-attend" role="tabpanel" aria-labelledby="list-attend-list">...</div>
-
           <div class="tab-pane fade" id="list-mes" role="tabpanel" aria-labelledby="list-mes-list">
             <div class="col-md-8">
               <form class="form-group" action="messearch.php" method="post">
@@ -514,16 +504,14 @@ if(isset($_POST['docsub1']))
               </thead>
               <tbody>
                 <?php 
-                  $con=mysqli_connect("localhost","root","","myhmsdb");
-                  global $con;
-
-                  $query = "select * from contact;";
-                  $result = mysqli_query($con,$query);
-                  while ($row = mysqli_fetch_array($result)){
-                      $contact_name = h($row['name']);
-                      $contact_email = h($row['email']);
-                      $contact_phone = h($row['contact']);
-                      $contact_message = h($row['message']);
+                  $query_contact = "select * from contact;";
+                  $result_contact = mysqli_query($con, $query_contact);
+                  if($result_contact){
+                    while ($row = mysqli_fetch_array($result_contact, MYSQLI_ASSOC)){
+                        $contact_name = h($row['name']);
+                        $contact_email = h($row['email']);
+                        $contact_phone = h($row['contact']);
+                        $contact_message = h($row['message']);
                 ?>
                     <tr>
                       <td><?php echo $contact_name;?></td>
@@ -531,7 +519,8 @@ if(isset($_POST['docsub1']))
                       <td><?php echo $contact_phone;?></td>
                       <td><?php echo $contact_message;?></td>
                     </tr>
-                  <?php } ?>
+                  <?php } 
+                  } ?>
               </tbody>
             </table><br>
           </div>
@@ -544,6 +533,5 @@ if(isset($_POST['docsub1']))
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.10.1/sweetalert2.all.min.js"></script>
   </body>
 </html>

@@ -1,13 +1,14 @@
 <?php
-
-
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-
 require_once('csrf_token.php');
 initializeCSRFToken();
+
 function h($value) {
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
@@ -15,10 +16,7 @@ function h($value) {
 $con = mysqli_connect("localhost", "root", "", "myhmsdb");
 
 if (!$con) {
-    die("Coneection to db failed: " . mysqli_connect_error());
-}
-function h($value) {
-    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+    die("Connection to db failed: " . mysqli_connect_error());
 }
 
 if(isset($_POST['patsub1'])){
@@ -31,7 +29,6 @@ if(isset($_POST['patsub1'])){
   $raw_fname = strip_tags($_POST['fname']);
   $raw_lname = strip_tags($_POST['lname']);
   
-
   if (strpbrk($raw_fname, './\\') !== false || strpbrk($raw_lname, './\\') !== false) {
       http_response_code(400);
       die("Path invalid inputs!.");
@@ -40,16 +37,14 @@ if(isset($_POST['patsub1'])){
   $fname = htmlspecialchars((string)$raw_fname, ENT_QUOTES, 'UTF-8');
   $lname = htmlspecialchars((string)$raw_lname, ENT_QUOTES, 'UTF-8');
   
-
   if (!preg_match('/^[a-zA-Z]+$/', $_POST['gender'])) {
       http_response_code(400);
       die("Formato genere non valido.");
   }
-  $gender = htmlspecialchars((string)$$_POST['gender'], ENT_QUOTES, 'UTF-8');
+
+  $gender = htmlspecialchars((string)$_POST['gender'], ENT_QUOTES, 'UTF-8');
   
-
   $clean_contact = preg_replace('/[^0-9]/', '', $_POST['contact']);
-
   $contact = substr($clean_contact, 0, 10);
   
   $email = htmlspecialchars((string)strip_tags($_POST['email']), ENT_QUOTES, 'UTF-8');
@@ -62,11 +57,13 @@ if(isset($_POST['patsub1'])){
   }
   
   if($password == $cpassword){
+    $password_hashed = password_hash($password, PASSWORD_BCRYPT);
+
     $query = "INSERT INTO patreg(fname, lname, gender, email, contact, password, cpassword) VALUES (?, ?, ?, ?, ?, ?, ?)";
     $stmt = mysqli_prepare($con, $query);
     
     if($stmt){
-        mysqli_stmt_bind_param($stmt, "sssssss", $fname, $lname, $gender, $email, $contact, $password, $cpassword);
+        mysqli_stmt_bind_param($stmt, "sssssss", $fname, $lname, $gender, $email, $contact, $password_hashed, $password_hashed);
         
         if(mysqli_stmt_execute($stmt)){
             $_SESSION['username'] = $fname." ".$lname;
@@ -91,12 +88,13 @@ if(isset($_POST['patsub1'])){
   }
 }
 
-// ==========================================
-// 2. AGGIORNAMENTO STATO PAGAMENTO
-// ==========================================
 if(isset($_POST['update_data']))
 {
-  // Anche qui, ripuliamo il contatto e forziamo la lunghezza massima a 10 caratteri!
+  if (!validateCSRFToken()) {
+    http_response_code(403);
+    die("Security validation failed. Please try again.");
+  }
+
   $clean_contact = preg_replace('/[^0-9]/', '', $_POST['contact']);
   $contact = substr($clean_contact, 0, 10);
   
@@ -121,6 +119,11 @@ if(isset($_POST['update_data']))
 
 if(isset($_POST['doc_sub']))
 {
+  if (!validateCSRFToken()) {
+    http_response_code(403);
+    die("Security validation failed. Please try again.");
+  }
+
   $raw_name = strip_tags($_POST['name']);
   if (strpbrk($raw_name, './\\') !== false) {
       http_response_code(400);
@@ -147,17 +150,20 @@ function display_docs()
   $result = mysqli_query($con, $query);
   while($row = mysqli_fetch_array($result, MYSQLI_ASSOC))
   {
-       $name = h($row['username']);
-    echo '<option value="' . $name . '">' . $name . '</option>';
+     // CORRETTO: Cambiato da username a name per combaciare con l'INSERT
+     $name = h($row['name']);
+     echo '<option value="' . $name . '">' . $name . '</option>';
   }
 }
 
-function display_admin_panel()){
+function display_admin_panel() {
   global $con;
   
   ob_start();
   display_docs();
   $docs_options = ob_get_clean();
+
+  $csrf_input = '<input type="hidden" name="csrf_token" value="' . h($_SESSION['csrf_token']) . '">';
 
   echo '<!DOCTYPE html>
 <html lang="en">
@@ -183,6 +189,7 @@ function display_admin_panel()){
       </li>
     </ul>
     <form class="form-inline my-2 my-lg-0" method="post" action="search.php">
+      ' . $csrf_input . '
       <input class="form-control mr-sm-2" type="text" placeholder="enter contact number" aria-label="Search" name="contact">
       <input type="submit" class="btn btn-outline-light my-2 my-sm-0 btn btn-outline-light" id="inputbtn" name="search_submit" value="Search">
     </form>
@@ -216,13 +223,14 @@ function display_admin_panel()){
             <div class="card-body">
               <center><h4>Create an appointment</h4></center><br>
               <form class="form-group" method="post" action="appointment.php">
+                ' . $csrf_input . '
                 <div class="row">
                   <div class="col-md-4"><label>First Name:</label></div>
                   <div class="col-md-8"><input type="text" class="form-control" name="fname"></div><br><br>
                   <div class="col-md-4"><label>Last Name:</label></div>
                   <div class="col-md-8"><input type="text" class="form-control"  name="lname"></div><br><br>
                   <div class="col-md-4"><label>Email id:</label></div>
-                  <div class="col-md-8"><input type="text"  class="form-control" name="email"></div><br><br>
+                  <div class="col-md-8"><input type="text" class="form-control" name="email"></div><br><br>
                   <div class="col-md-4"><label>Contact Number:</label></div>
                   <div class="col-md-8"><input type="text" class="form-control"  name="contact"></div><br><br>
                   <div class="col-md-4"><label>Doctor:</label></div>
@@ -253,6 +261,7 @@ function display_admin_panel()){
         <div class="card">
           <div class="card-body">
             <form class="form-group" method="post" action="func.php">
+              ' . $csrf_input . '
               <input type="text" name="contact" class="form-control" placeholder="enter contact"><br>
               <select name="status" class="form-control">
                <option value="" disabled selected>Select Payment Status to update</option>
@@ -267,6 +276,7 @@ function display_admin_panel()){
       <div class="tab-pane fade" id="list-messages" role="tabpanel" aria-labelledby="list-messages-list">...</div>
       <div class="tab-pane fade" id="list-settings" role="tabpanel" aria-labelledby="list-settings-list">
         <form class="form-group" method="post" action="func.php">
+          ' . $csrf_input . '
           <label>Doctors name: </label>
           <input type="text" name="name" placeholder="enter doctors name" class="form-control">
           <br>
