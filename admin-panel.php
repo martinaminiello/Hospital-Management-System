@@ -49,7 +49,7 @@ if(isset($_POST['app-submit']))
             
             if(mysqli_stmt_execute($stmt_ins)){
               mysqli_stmt_close($stmt_ins);
-              echo "<script>alert('Your appointment successfully booked'); window.location.href='patient-panel.php';</script>";
+              echo "<script>alert('Your appointment successfully booked'); window.location.href='admin-panel.php';</script>";
               exit();
             } else {
               echo "<script>alert('Unable to process your request. Please try again!');</script>";
@@ -80,7 +80,7 @@ if(isset($_GET['cancel']) && isset($_GET['ID']))
       mysqli_stmt_bind_param($stmt_cancel, "i", $cancel_id);
       if(mysqli_stmt_execute($stmt_cancel)){
          mysqli_stmt_close($stmt_cancel);
-         echo "<script>alert('Your appointment successfully cancelled'); window.location.href='patient-panel.php';</script>";
+         echo "<script>alert('Your appointment successfully cancelled'); window.location.href='admin-panel.php';</script>";
          exit();
       }
     }
@@ -342,7 +342,6 @@ function get_specs(){
                                     'spec' => htmlspecialchars((string)$row['spec'], ENT_QUOTES, 'UTF-8')
                                 );
                             }
-                            echo json_encode($docarray);
                         }
 ?>
         

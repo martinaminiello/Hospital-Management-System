@@ -587,7 +587,7 @@ define('select2/utils',[
     var chars = '';
 
     for (var i = 0; i < length; i++) {
-      var randomChar = Math.floor(Math.random() * 36);
+      var  randomChar = Math.floor(crypto.getRandomValues(new Uint32Array(1))[0] % 36);
       chars += randomChar.toString(36);
     }
 

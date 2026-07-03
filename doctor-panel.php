@@ -391,7 +391,7 @@ if(isset($_GET['cancel']) && isset($_GET['ID']))
 
       <div class="tab-pane fade" id="list-messages" role="tabpanel" aria-labelledby="list-messages-list">...</div>
       <div class="tab-pane fade" id="list-settings" role="tabpanel" aria-labelledby="list-settings-list">
-        <form class="form-group" method="post" action="admin-panel1.php">
+        <form class="form-group" method="post" action="admin-panel1.php" autocomplete="off">
           <div class="row">
                   <div class="col-md-4"><label>Doctor Name:</label></div>
                   <div class="col-md-8"><input type="text" class="form-control" name="doctor" required></div><br><br>

@@ -313,7 +313,7 @@ if(isset($_POST['docsub1']))
                         <td>$username</td>
                         <td>$spec</td>
                         <td>$email</td>
-                        <td>$password</td>
+                   
                         <td>$docFees</td>
                       </tr>";
                     }
@@ -368,7 +368,7 @@ if(isset($_POST['docsub1']))
                         <td>$gender</td>
                         <td>$email</td>
                         <td>$contact</td>
-                        <td>$password</td>
+        
                       </tr>";
                     }
 
@@ -538,9 +538,9 @@ if(isset($_POST['docsub1']))
                   <div class="col-md-4"><label>Email ID:</label></div>
                   <div class="col-md-8"><input type="email"  class="form-control" name="demail" required></div><br><br>
                   <div class="col-md-4"><label>Password:</label></div>
-                  <div class="col-md-8"><input type="password" class="form-control"  onkeyup='check();' name="dpassword" id="dpassword"  required></div><br><br>
+                  <div class="col-md-8"><input type="password" class="form-control"  onkeyup='check();' name="dpassword" id="dpassword"  autocomplete="off" required></div><br><br>
                   <div class="col-md-4"><label>Confirm Password:</label></div>
-                  <div class="col-md-8"  id='cpass'><input type="password" class="form-control" onkeyup='check();' name="cdpassword" id="cdpassword" required>&nbsp &nbsp<span id='message'></span> </div><br><br>
+                  <div class="col-md-8"  id='cpass'><input type="password" class="form-control" onkeyup='check();' name="cdpassword" id="cdpassword" autocomplete="off" required>&nbsp &nbsp<span id='message'></span> </div><br><br>
                    
                   
                   <div class="col-md-4"><label>Consultancy Fees:</label></div>

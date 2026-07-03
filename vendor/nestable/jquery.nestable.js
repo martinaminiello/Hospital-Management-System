@@ -98,8 +98,9 @@
                     return;
                 }
 
-                list.isTouch = /^touch/.test(e.type);
-                if (list.isTouch && e.touches.length !== 1) {
+                var isTouchEvent = typeof e.type === 'string' && e.type.indexOf('touch') === 0;
+                list.isTouch = isTouchEvent;
+                if (list.isTouch && (!e.touches || e.touches.length !== 1)) {
                     return;
                 }
 

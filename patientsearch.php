@@ -49,7 +49,7 @@ if(isset($_POST['patient_search_submit']))
               <td>$lname</td>
               <td>$email</td>
               <td>$contact</td>
-              <td>$password</td>
+         
             </tr>";
         
       echo "</tbody></table><center><a href='admin-panel1.php' class='btn btn-light'>Back to dashboard</a></div></center></div></div></div>";

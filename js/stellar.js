@@ -138,7 +138,9 @@
 
 	Plugin.prototype = {
 		init: function() {
-			this.options.name = pluginName + '_' + Math.floor(Math.random() * 1e9);
+			this.options.name = pluginName + '_' + Array.from(crypto.getRandomValues(new Uint8Array(4)))
+												.map(x => x.toString(16).padStart(2, '0'))
+												.join('');
 
 			this._defineElements();
 			this._defineGetters();

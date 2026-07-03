@@ -45,7 +45,7 @@ if(isset($_POST['doctor_search_submit']))
             $docFees = htmlspecialchars((string)$row['docFees'], ENT_QUOTES);
             echo "<tr>
               <td>$username</td>
-              <td>$password</td>
+             
               <td>$email</td>
               <td>$docFees</td>
             </tr>";

@@ -405,7 +405,7 @@ class TCPDF_STATIC {
 	 * @public static
 	 */
 	public static function getRandomSeed($seed='') {
-		$rnd = uniqid(rand().microtime(true), true);
+		$rnd = bin2hex(random_bytes(16));
 		if (function_exists('posix_getpid')) {
 			$rnd .= posix_getpid();
 		}
