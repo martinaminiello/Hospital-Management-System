@@ -1,6 +1,12 @@
 
 <?php 
 include('func.php');  
+
+if (!isset($_SESSION['pid'])) {
+    header('Location: index1.php');
+    exit();
+}
+
 include('newfunc.php');
 $con = mysqli_connect("localhost", "root", "", "myhmsdb");
 

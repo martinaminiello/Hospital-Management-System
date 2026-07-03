@@ -5,19 +5,22 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-// Include CSRF token protection
+
 require_once('csrf_token.php');
 initializeCSRFToken();
+function h($value) {
+    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+}
 
 $con = mysqli_connect("localhost", "root", "", "myhmsdb");
 
 if (!$con) {
-    die("Connessione al database fallita: " . mysqli_connect_error());
+    die("Coneection to db failed: " . mysqli_connect_error());
+}
+function h($value) {
+    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
-// ==========================================
-// 1. ELABORAZIONE REGISTRAZIONE PAZIENTE
-// ==========================================
 if(isset($_POST['patsub1'])){
   // Validate CSRF token
   if (!validateCSRFToken()) {
@@ -28,25 +31,25 @@ if(isset($_POST['patsub1'])){
   $raw_fname = strip_tags($_POST['fname']);
   $raw_lname = strip_tags($_POST['lname']);
   
-  // RIFIUTO DIRETTO PATH TRAVERSAL: se contengono caratteri di percorso, ZAP riceve 400 e si ferma
+
   if (strpbrk($raw_fname, './\\') !== false || strpbrk($raw_lname, './\\') !== false) {
       http_response_code(400);
-      die("Rilevati caratteri non consentiti nel nome o cognome.");
+      die("Path invalid inputs!.");
   }
   
   $fname = htmlspecialchars((string)$raw_fname, ENT_QUOTES, 'UTF-8');
   $lname = htmlspecialchars((string)$raw_lname, ENT_QUOTES, 'UTF-8');
   
-  // VALIDAZIONE GENDER: accettiamo solo lettere. Se ZAP mette apici o parentesi, lo blocchiamo
+
   if (!preg_match('/^[a-zA-Z]+$/', $_POST['gender'])) {
       http_response_code(400);
       die("Formato genere non valido.");
   }
   $gender = htmlspecialchars((string)$$_POST['gender'], ENT_QUOTES, 'UTF-8');
   
-  // VALIDAZIONE TELEFONO: accettiamo solo cifre numeriche
+
   $clean_contact = preg_replace('/[^0-9]/', '', $_POST['contact']);
-  // Taglio a 10 caratteri per evitare l'errore 500 del database (VARCHAR 10)
+
   $contact = substr($clean_contact, 0, 10);
   
   $email = htmlspecialchars((string)strip_tags($_POST['email']), ENT_QUOTES, 'UTF-8');
@@ -116,9 +119,6 @@ if(isset($_POST['update_data']))
   }
 }
 
-// ==========================================
-// 3. AGGIUNTA NUOVO MEDICO
-// ==========================================
 if(isset($_POST['doc_sub']))
 {
   $raw_name = strip_tags($_POST['name']);
@@ -147,7 +147,7 @@ function display_docs()
   $result = mysqli_query($con, $query);
   while($row = mysqli_fetch_array($result, MYSQLI_ASSOC))
   {
-    $name = htmlspecialchars((string)$row['name'], ENT_QUOTES, 'UTF-8');
+       $name = h($row['username']);
     echo '<option value="' . $name . '">' . $name . '</option>';
   }
 }

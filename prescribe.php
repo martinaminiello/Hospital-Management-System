@@ -6,11 +6,14 @@ error_reporting(E_ALL);
 
 include('func1.php');
 
-
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
-include('func1.php');
+
+// Funzione di sanificazione globale robusta (XSS protection)
+function h($value) {
+    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+}
 
 $pid = '';
 $ID = '';
@@ -21,7 +24,6 @@ $lname = '';
 $doctor = isset($_SESSION['dname']) ? $_SESSION['dname'] : 'Doctor';
 
 if(isset($_GET['pid']) && isset($_GET['ID']) && isset($_GET['appdate']) && isset($_GET['apptime']) && isset($_GET['fname']) && isset($_GET['lname'])) {
-
   $pid = filter_var($_GET['pid'], FILTER_VALIDATE_INT) !== false ? (int)$_GET['pid'] : '';
   $ID = filter_var($_GET['ID'], FILTER_VALIDATE_INT) !== false ? (int)$_GET['ID'] : '';
   $fname = preg_match('/^[a-zA-Z\s\-\.\']{1,100}$/', $_GET['fname']) ? $_GET['fname'] : '';
@@ -48,7 +50,6 @@ if(isset($_POST['prescribe']) && isset($_POST['pid']) && isset($_POST['ID']) && 
     
     if(mysqli_stmt_execute($stmt)){
       mysqli_stmt_close($stmt);
-      // SBLOCCO: Dopo l'ok dell'alert, l'utente viene reindirizzato alla dashboard del dottore
       echo "<script>
               alert('Prescribed successfully!');
               window.location.href = 'doctor-panel.php';
@@ -59,7 +60,8 @@ if(isset($_POST['prescribe']) && isset($_POST['pid']) && isset($_POST['ID']) && 
     }
   }
   else {
-    die("Error in preparing query: " . mysqli_error($con));
+    // SANIFICATO: L'eventuale errore di sistema non può più iniettare XSS riflesso
+    die("Error in preparing query: " . h(mysqli_error($con)));
   }
 }
 ?>
@@ -87,9 +89,9 @@ if(isset($_POST['prescribe']) && isset($_POST['pid']) && isset($_POST['ID']) && 
         .bg-primary { background: -webkit-linear-gradient(left, #3931af, #00c6ff); }
         .list-group-item.active { z-index: 2; color: #fff; background-color: #342ac1; border-color: #007bff; }
         .text-primary { color: #342ac1!important; }
-        .btn-primary{ background-color: #3c50c1; border-color: #3c50c1; }
-        button:hover{cursor:pointer;}
-        #inputbtn:hover{cursor:pointer;}
+        .btn-primary { background-color: #3c50c1; border-color: #3c50c1; }
+        button:hover { cursor:pointer; }
+        #inputbtn:hover { cursor:pointer; }
       </style>
 
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -107,8 +109,8 @@ if(isset($_POST['prescribe']) && isset($_POST['pid']) && isset($_POST['ID']) && 
 
 <body style="padding-top:50px;">
    <div class="container-fluid" style="margin-top:50px;">
-    <h3 style = "margin-left: 40%;  padding-bottom: 20px; font-family: 'IBM Plex Sans', sans-serif;"> 
-      Welcome &nbsp;<?php echo htmlspecialchars((string)$doctor, ENT_QUOTES); ?>
+    <h3 style="margin-left: 40%; padding-bottom: 20px; font-family: 'IBM Plex Sans', sans-serif;"> 
+      Welcome &nbsp;<?php echo h($doctor); ?>
     </h3>
 
    <div class="tab-pane" id="list-pres" role="tabpanel" aria-labelledby="list-pres-list">
@@ -117,25 +119,25 @@ if(isset($_POST['prescribe']) && isset($_POST['pid']) && isset($_POST['ID']) && 
           <div class="row">
                   <div class="col-md-4"><label>Disease:</label></div>
                   <div class="col-md-8">
-                    <textarea id="disease" cols="86" rows ="5" name="disease" required></textarea>
+                    <textarea id="disease" cols="86" rows="5" name="disease" required></textarea>
                   </div><br><br><br>
                   
                   <div class="col-md-4"><label>Allergies:</label></div>
                   <div class="col-md-8">
-                    <textarea id="allergy" cols="86" rows ="5" name="allergy" required></textarea>
+                    <textarea id="allergy" cols="86" rows="5" name="allergy" required></textarea>
                   </div><br><br><br>
                   
                   <div class="col-md-4"><label>Prescription:</label></div>
                   <div class="col-md-8">
-                    <textarea id="prescription" cols="86" rows ="10" name="prescription" required></textarea>
+                    <textarea id="prescription" cols="86" rows="10" name="prescription" required></textarea>
                   </div><br><br><br>   
                   
-                  <input type="hidden" name="fname" value="<?php echo htmlspecialchars((string)$fname, ENT_QUOTES);?>" />
-                  <input type="hidden" name="lname" value="<?php echo htmlspecialchars((string)$lname, ENT_QUOTES);?>" />
-                  <input type="hidden" name="appdate" value="<?php echo htmlspecialchars((string)$appdate, ENT_QUOTES);?>" />
-                  <input type="hidden" name="apptime" value="<?php echo htmlspecialchars((string)$apptime, ENT_QUOTES);?>" />
-                  <input type="hidden" name="pid" value="<?php echo htmlspecialchars((string)$pid, ENT_QUOTES);?>" />
-                  <input type="hidden" name="ID" value="<?php echo htmlspecialchars((string)$ID, ENT_QUOTES);?>" />
+                  <input type="hidden" name="fname" value="<?php echo h($fname);?>" />
+                  <input type="hidden" name="lname" value="<?php echo h($lname);?>" />
+                  <input type="hidden" name="appdate" value="<?php echo h($appdate);?>" />
+                  <input type="hidden" name="apptime" value="<?php echo h($apptime);?>" />
+                  <input type="hidden" name="pid" value="<?php echo h($pid);?>" />
+                  <input type="hidden" name="ID" value="<?php echo h($ID);?>" />
 
                   <br><br><br><br>
           <input type="submit" name="prescribe" value="Prescribe" class="btn btn-primary" style="margin-left: 40pc;">

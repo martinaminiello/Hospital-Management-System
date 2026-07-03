@@ -3,8 +3,10 @@
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
+function h($value) {
+    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+}
 
-// Include CSRF token protection
 require_once('csrf_token.php');
 initializeCSRFToken();
 
@@ -79,7 +81,8 @@ function display_docs()
     if($result) {
         while($row = mysqli_fetch_array($result, MYSQLI_ASSOC))
         {
-            $name = htmlspecialchars((string)$row['name'], ENT_QUOTES, 'UTF-8');
+           
+			$name = h($row['username']);
             echo '<option value="' . $name . '">' . $name . '</option>';
         }
     }
