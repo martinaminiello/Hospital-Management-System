@@ -4293,7 +4293,37 @@ class TCPDF {
 		}
 		// include font file
 		if (!TCPDF_STATIC::empty_string($fontfile) AND (@TCPDF_STATIC::file_exists($fontfile))) {
-			include($fontfile);
+			$fontfile_path = @realpath($fontfile);
+			$allowed = false;
+			if ($fontfile_path !== false) {
+				$allowed_dirs = array();
+				if (!TCPDF_STATIC::empty_string($fontdir)) {
+					$fontdir_real = @realpath($fontdir);
+					if ($fontdir_real !== false) {
+						$allowed_dirs[] = $fontdir_real;
+					}
+				}
+				if (defined('K_PATH_FONTS')) {
+					$k_path_fonts = @realpath(K_PATH_FONTS);
+					if ($k_path_fonts !== false) {
+						$allowed_dirs[] = $k_path_fonts;
+					}
+				}
+				foreach ($allowed_dirs as $dir) {
+					if ($fontfile_path === $dir || strpos($fontfile_path, $dir.DIRECTORY_SEPARATOR) === 0) {
+						$allowed = true;
+						break;
+					}
+				}
+				if (!$allowed && (basename($fontfile) === $fontfile)) {
+					$allowed = true;
+				}
+			}
+			if ($allowed) {
+				include($fontfile_path);
+			} else {
+				$this->Error('Could not include font definition file: '.$family.'');
+			}
 		} else {
 			$this->Error('Could not include font definition file: '.$family.'');
 		}
@@ -13459,7 +13489,7 @@ class TCPDF {
 	 * To export crt to p12: openssl pkcs12 -export -in tcpdf.crt -out tcpdf.p12
 	 * To convert pfx certificate to pem: openssl pkcs12 -in tcpdf.pfx -out tcpdf.crt -nodes
 	 * @param $signing_cert (mixed) signing certificate (string or filename prefixed with 'file://')
-	 * @param $private_key (mixed) private key (string or filename prefixed with 'file://')
+	 * @param $private_key (mixed) private key (string or filename prefixed with 'file://'). Do not keep the private key in plaintext in source code; use a secure external file or secret store.
 	 * @param $private_key_password (string) password
 	 * @param $extracerts (string) specifies the name of a file containing a bunch of extra certificates to include in the signature which can for example be used to help the recipient to verify the certificate that you used.
 	 * @param $cert_type (int) The access permissions granted for this document. Valid values shall be: 1 = No changes to the document shall be permitted; any change to the document shall invalidate the signature; 2 = Permitted changes shall be filling in forms, instantiating page templates, and signing; other changes shall invalidate the signature; 3 = Permitted changes shall be the same as for 2, as well as annotation creation, deletion, and modification; other changes shall invalidate the signature.
@@ -13469,7 +13499,7 @@ class TCPDF {
 	 * @author Nicola Asuni
 	 * @since 4.6.005 (2009-04-24)
 	 */
-	public function setSignature($signing_cert='', $private_key='', $private_key_password='', $extracerts='', $cert_type=2, $info=array(), $approval='') {
+	public function setSignature($signing_cert='', $private_key=null, $private_key_password=null, $extracerts='', $cert_type=2, $info=array(), $approval='') {
 		// to create self-signed signature: openssl req -x509 -nodes -days 365000 -newkey rsa:1024 -keyout tcpdf.crt -out tcpdf.crt
 		// to export crt to p12: openssl pkcs12 -export -in tcpdf.crt -out tcpdf.p12
 		// to convert pfx certificate to pem: openssl
@@ -13479,15 +13509,15 @@ class TCPDF {
 		$this->sig_obj_id = $this->n; // signature widget
 		++$this->n; // signature object ($this->sig_obj_id + 1)
 		$this->signature_data = array();
-		if (strlen($signing_cert) == 0) {
+		if (TCPDF_STATIC::empty_string($signing_cert)) {
 			$this->Error('Please provide a certificate file and password!');
 		}
-		if (strlen($private_key) == 0) {
-			$private_key = $signing_cert;
+		if (TCPDF_STATIC::empty_string($private_key) && !TCPDF_STATIC::empty_string($signing_cert)) {
+			$this->Error('Please provide a private key for the certificate!');
 		}
 		$this->signature_data['signcert'] = $signing_cert;
 		$this->signature_data['privkey'] = $private_key;
-		$this->signature_data['password'] = $private_key_password;
+		$this->signature_data['password'] = TCPDF_STATIC::empty_string($private_key_password) ? null : $private_key_password;
 		$this->signature_data['extracerts'] = $extracerts;
 		$this->signature_data['cert_type'] = $cert_type;
 		$this->signature_data['info'] = $info;

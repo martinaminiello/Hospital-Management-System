@@ -1,58 +1,83 @@
 <?php
+
+    session_set_cookie_params([
+    'lifetime' => 0,         
+    'path' => '/',            
+    'domain' => '',           
+    'secure' => false,        
+    'httponly' => true,       
+    'samesite' => 'Lax'       
+]);
+
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 $con = mysqli_connect("localhost", "root", "", "myhmsdb");
 
+if (!$con) {
+    die("Connessione al database fallita: " . mysqli_connect_error());
+}
+
+
 if(isset($_POST['patsub1'])){
-  $fname = $_POST['fname'];
-  $lname = $_POST['lname'];
-  $gender = $_POST['gender'];
-  $email = $_POST['email'];
-  $contact = $_POST['contact'];
+  
+ 
+  $fname = htmlspecialchars((string)str_replace(array('.', '/', '\\'), '', strip_tags($_POST['fname'])), ENT_QUOTES, 'UTF-8');
+  $lname = htmlspecialchars((string)str_replace(array('.', '/', '\\'), '', strip_tags($_POST['lname'])), ENT_QUOTES, 'UTF-8');
+  
+  
+  $clean_gender = preg_replace('/[^a-zA-Z]/', '', $_POST['gender']);
+  $gender = htmlspecialchars((string)$clean_gender, ENT_QUOTES, 'UTF-8');
+  
+ 
+  $clean_contact = preg_replace('/[^0-9]/', '', $_POST['contact']);
+  $contact = substr($clean_contact, 0, 10);
+  
+  $email = htmlspecialchars((string)strip_tags($_POST['email']), ENT_QUOTES, 'UTF-8');
   $password = $_POST['password'];
   $cpassword = $_POST['cpassword'];
   
+
+  if(empty($fname) || empty($lname) || empty($contact) || empty($gender)){
+      http_response_code(400);
+      die("Input non valido rilevato.");
+  }
+  
   if($password == $cpassword){
-    // Convertito in Prepared Statement per Fortify e sicurezza SQLi
     $query = "INSERT INTO patreg(fname, lname, gender, email, contact, password, cpassword) VALUES (?, ?, ?, ?, ?, ?, ?)";
     $stmt = mysqli_prepare($con, $query);
     
     if($stmt){
         mysqli_stmt_bind_param($stmt, "sssssss", $fname, $lname, $gender, $email, $contact, $password, $cpassword);
         
-       if(mysqli_stmt_execute($stmt)){
-    $_SESSION['username'] = $fname." ".$lname;
-    $_SESSION['fname'] = $fname;
-    $_SESSION['lname'] = $lname;
-    $_SESSION['gender'] = $gender;
-    $_SESSION['contact'] = $contact;
-    $_SESSION['email'] = $email;
-    
-
-    $_SESSION['pid'] = mysqli_insert_id($con); 
-    
-    mysqli_stmt_close($stmt);
-
-    header("Location:admin-panel.php");
-    exit();
-}
+        if(mysqli_stmt_execute($stmt)){
+            $_SESSION['username'] = $fname." ".$lname;
+            $_SESSION['fname'] = $fname;
+            $_SESSION['lname'] = $lname;
+            $_SESSION['gender'] = $gender;
+            $_SESSION['contact'] = $contact;
+            $_SESSION['email'] = $email;
+            $_SESSION['pid'] = mysqli_insert_id($con); 
+            
+            mysqli_stmt_close($stmt);
+            header("Location:admin-panel.php");
+            exit();
         } else {
             mysqli_stmt_close($stmt);
             die("Errore durante la registrazione: " . mysqli_error($con));
         }
     }
-  }
-  else{
+  } else {
     header("Location:error1.php");
     exit();
   }
 }
 
+
 if(isset($_POST['update_data']))
 {
-  $contact = $_POST['contact'];
-  $status = $_POST['status'];
+  $contact = htmlspecialchars((string)strip_tags($_POST['contact']), ENT_QUOTES, 'UTF-8');
+  $status = htmlspecialchars((string)strip_tags($_POST['status']), ENT_QUOTES, 'UTF-8');
   
   $query = "UPDATE appointmenttb SET payment=? WHERE contact=?;";
   $stmt = mysqli_prepare($con, $query);
@@ -66,9 +91,10 @@ if(isset($_POST['update_data']))
   }
 }
 
+
 if(isset($_POST['doc_sub']))
 {
-  $name = $_POST['name'];
+  $name = htmlspecialchars((string)str_replace(array('.', '/', '\\'), '', strip_tags($_POST['name'])), ENT_QUOTES, 'UTF-8');
   $query = "INSERT INTO doctb(name) VALUES (?)";
   $stmt = mysqli_prepare($con, $query);
   if($stmt){
@@ -81,6 +107,7 @@ if(isset($_POST['doc_sub']))
   }
 }
 
+
 function display_docs()
 {
   global $con;
@@ -89,11 +116,18 @@ function display_docs()
   while($row = mysqli_fetch_array($result, MYSQLI_ASSOC))
   {
     $name = htmlspecialchars((string)$row['name'], ENT_QUOTES, 'UTF-8');
-    echo '<option value="'.$name.'">'.$name.'</option>';
+    echo '<option value="' . $name . '">' . $name . '</option>';
   }
 }
 
+
 function display_admin_panel(){
+  global $con;
+  
+  ob_start();
+  display_docs();
+  $docs_options = ob_get_clean();
+
   echo '<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -163,7 +197,7 @@ function display_admin_panel(){
                   <div class="col-md-4"><label>Doctor:</label></div>
                   <div class="col-md-8">
                    <select name="doctor" class="form-control" >
-                      '; ?> <?php display_docs(); ?> <?php echo '
+                      ' . $docs_options . '
                     </select>
                   </div><br><br>
                   <div class="col-md-4"><label>Payment:</label></div>

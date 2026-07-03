@@ -1,5 +1,15 @@
 <?php
-session_start();
+ session_set_cookie_params([
+    'lifetime' => 0,         
+    'path' => '/',            
+    'domain' => '',           
+    'secure' => false,        
+    'httponly' => true,       
+    'samesite' => 'Lax'       
+]);
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 $con=mysqli_connect("localhost","root","","myhmsdb");
 if(isset($_POST['search_submit'])){
   $contact=$_POST['contact'];

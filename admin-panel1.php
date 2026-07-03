@@ -4,6 +4,10 @@ $con=mysqli_connect("localhost","root","","myhmsdb");
 
 include('newfunc.php');
 
+function h($value) {
+    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+}
+
 if(isset($_POST['docsub']))
 {
   $doctor=$_POST['doctor'];
@@ -292,7 +296,6 @@ if(isset($_POST['docsub1']))
                     <th scope="col">Doctor Name</th>
                     <th scope="col">Specialization</th>
                     <th scope="col">Email</th>
-                    <th scope="col">Password</th>
                     <th scope="col">Fees</th>
                   </tr>
                 </thead>
@@ -306,7 +309,6 @@ if(isset($_POST['docsub1']))
                       $username = htmlspecialchars((string)$row['username'], ENT_QUOTES);
                       $spec = htmlspecialchars((string)$row['spec'], ENT_QUOTES);
                       $email = htmlspecialchars((string)$row['email'], ENT_QUOTES);
-                      $password = htmlspecialchars((string)$row['password'], ENT_QUOTES);
                       $docFees = htmlspecialchars((string)$row['docFees'], ENT_QUOTES);
                       
                       echo "<tr>
@@ -343,7 +345,6 @@ if(isset($_POST['docsub1']))
                     <th scope="col">Gender</th>
                     <th scope="col">Email</th>
                     <th scope="col">Contact</th>
-                    <th scope="col">Password</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -353,25 +354,22 @@ if(isset($_POST['docsub1']))
                     $query = "select * from patreg";
                     $result = mysqli_query($con,$query);
                     while ($row = mysqli_fetch_array($result)){
-                      $pid = htmlspecialchars((string)$row['pid'], ENT_QUOTES);
-                      $fname = htmlspecialchars((string)$row['fname'], ENT_QUOTES);
-                      $lname = htmlspecialchars((string)$row['lname'], ENT_QUOTES);
-                      $gender = htmlspecialchars((string)$row['gender'], ENT_QUOTES);
-                      $email = htmlspecialchars((string)$row['email'], ENT_QUOTES);
-                      $contact = htmlspecialchars((string)$row['contact'], ENT_QUOTES);
-                      $password = htmlspecialchars((string)$row['password'], ENT_QUOTES);
-                      
-                      echo "<tr>
-                        <td>$pid</td>
-                        <td>$fname</td>
-                        <td>$lname</td>
-                        <td>$gender</td>
-                        <td>$email</td>
-                        <td>$contact</td>
-        
-                      </tr>";
-                    }
+                        $pid = h($row['pid']);
+                        $fname = h($row['fname']);
+                        $lname = h($row['lname']);
+                        $gender = h($row['gender']);
+                        $email = h($row['email']);
+                        $contact = h($row['contact']);
 
+                            echo '<tr>' .
+                              '<td>' . $pid . '</td>' .
+                              '<td>' . $fname . '</td>' .
+                              '<td>' . $lname . '</td>' .
+                              '<td>' . $gender . '</td>' .
+                              '<td>' . $email . '</td>' .
+                              '<td>' . $contact . '</td>' .
+                              '</tr>';
+                    }
                   ?>
                 </tbody>
               </table>
@@ -409,30 +407,29 @@ if(isset($_POST['docsub1']))
                     $query = "select * from prestb";
                     $result = mysqli_query($con,$query);
                     while ($row = mysqli_fetch_array($result)){
-                      $doctor = htmlspecialchars((string)$row['doctor'], ENT_QUOTES);
-                      $pid = htmlspecialchars((string)$row['pid'], ENT_QUOTES);
-                      $ID = htmlspecialchars((string)$row['ID'], ENT_QUOTES);
-                      $fname = htmlspecialchars((string)$row['fname'], ENT_QUOTES);
-                      $lname = htmlspecialchars((string)$row['lname'], ENT_QUOTES);
-                      $appdate = htmlspecialchars((string)$row['appdate'], ENT_QUOTES);
-                      $apptime = htmlspecialchars((string)$row['apptime'], ENT_QUOTES);
-                      $disease = htmlspecialchars((string)$row['disease'], ENT_QUOTES);
-                      $allergy = htmlspecialchars((string)$row['allergy'], ENT_QUOTES);
-                      $pres = htmlspecialchars((string)$row['pres'], ENT_QUOTES);
+                      $doctor = h($row['doctor']);
+                      $pid = h($row['pid']);
+                      $ID = h($row['ID']);
+                      $fname = h($row['fname']);
+                      $lname = h($row['lname']);
+                      $appdate = h($row['appdate']);
+                      $apptime = h($row['apptime']);
+                      $disease = h($row['disease']);
+                      $allergy = h($row['allergy']);
+                      $pres = h($row['pres']);
 
-                      
-                      echo "<tr>
-                        <td>$doctor</td>
-                        <td>$pid</td>
-                        <td>$ID</td>
-                        <td>$fname</td>
-                        <td>$lname</td>
-                        <td>$appdate</td>
-                        <td>$apptime</td>
-                        <td>$disease</td>
-                        <td>$allergy</td>
-                        <td>$pres</td>
-                      </tr>";
+                      echo '<tr>' .
+                           '<td>' . $doctor . '</td>' .
+                           '<td>' . $pid . '</td>' .
+                           '<td>' . $ID . '</td>' .
+                           '<td>' . $fname . '</td>' .
+                           '<td>' . $lname . '</td>' .
+                           '<td>' . $appdate . '</td>' .
+                           '<td>' . $apptime . '</td>' .
+                           '<td>' . $disease . '</td>' .
+                           '<td>' . $allergy . '</td>' .
+                           '<td>' . $pres . '</td>' .
+                           '</tr>';
                     }
 
                   ?>
@@ -482,19 +479,30 @@ if(isset($_POST['docsub1']))
                     $query = "select * from appointmenttb;";
                     $result = mysqli_query($con,$query);
                     while ($row = mysqli_fetch_array($result)){
+                        $row_id = h($row['ID']);
+                        $row_pid = h($row['pid']);
+                        $row_fname = h($row['fname']);
+                        $row_lname = h($row['lname']);
+                        $row_gender = h($row['gender']);
+                        $row_email = h($row['email']);
+                        $row_contact = h($row['contact']);
+                        $row_doctor = h($row['doctor']);
+                        $row_docFees = h($row['docFees']);
+                        $row_appdate = h($row['appdate']);
+                        $row_apptime = h($row['apptime']);
                   ?>
                       <tr>
-                        <td><?php echo htmlspecialchars((string)$row['ID'],ENT_QUOTES);?></td>
-                        <td><?php echo htmlspecialchars((string)$row['pid'],ENT_QUOTES);?></td>
-                        <td><?php echo htmlspecialchars((string)$row['fname'],ENT_QUOTES);?></td>
-                        <td><?php echo htmlspecialchars((string)$row['lname'],ENT_QUOTES);?></td>
-                        <td><?php echo htmlspecialchars((string)$row['gender'],ENT_QUOTES);?></td>
-                        <td><?php echo htmlspecialchars((string)$row['email'],ENT_QUOTES);?></td>
-                        <td><?php echo htmlspecialchars((string)$row['contact'],ENT_QUOTES);?></td>
-                        <td><?php echo htmlspecialchars((string)$row['doctor'],ENT_QUOTES);?></td>
-                        <td><?php echo htmlspecialchars((string)$row['docFees'],ENT_QUOTES);?></td>
-                        <td><?php echo htmlspecialchars((string)$row['appdate'],ENT_QUOTES);?></td>
-                        <td><?php echo htmlspecialchars((string)$row['apptime'],ENT_QUOTES);?></td>
+                        <td><?php echo $row_id;?></td>
+                        <td><?php echo $row_pid;?></td>
+                        <td><?php echo $row_fname;?></td>
+                        <td><?php echo $row_lname;?></td>
+                        <td><?php echo $row_gender;?></td>
+                        <td><?php echo $row_email;?></td>
+                        <td><?php echo $row_contact;?></td>
+                        <td><?php echo $row_doctor;?></td>
+                        <td><?php echo $row_docFees;?></td>
+                        <td><?php echo $row_appdate;?></td>
+                        <td><?php echo $row_apptime;?></td>
               
                         <td>
                     <?php if(($row['userStatus']==1) && ($row['doctorStatus']==1))  
@@ -593,18 +601,17 @@ if(isset($_POST['docsub1']))
                     $query = "select * from contact;";
                     $result = mysqli_query($con,$query);
                     while ($row = mysqli_fetch_array($result)){
-              
-                      #$fname = $row['fname'];
-                      #$lname = $row['lname'];
-                      #$email = $row['email'];
-                      #$contact = $row['contact'];
+                        $contact_name = h($row['name']);
+                        $contact_email = h($row['email']);
+                        $contact_phone = h($row['contact']);
+                        $contact_message = h($row['message']);
                   ?>
                       <tr>
                   
-                        <td><?php echo  htmlspecialchars((string)$row['name'],ENT_QUOTES);?></td>
-                        <td><?php echo  htmlspecialchars((string)$row['email'],ENT_QUOTES);?></td>
-                        <td><?php echo  htmlspecialchars((string)$row['contact'],ENT_QUOTES);?></td>
-                        <td><?php echo  htmlspecialchars((string)$row['message'],ENT_QUOTES);?></td>
+                        <td><?php echo $contact_name;?></td>
+                        <td><?php echo $contact_email;?></td>
+                        <td><?php echo $contact_phone;?></td>
+                        <td><?php echo $contact_message;?></td>
                       </tr>
                     <?php } ?>
                 </tbody>

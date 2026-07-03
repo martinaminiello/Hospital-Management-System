@@ -1,4 +1,14 @@
 <?php
+
+ session_set_cookie_params([
+    'lifetime' => 0,         
+    'path' => '/',            
+    'domain' => '',           
+    'secure' => false,        
+    'httponly' => true,       
+    'samesite' => 'Lax'       
+]);
+
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
@@ -43,7 +53,7 @@ if (!function_exists('display_docs')) {
         while ($row = mysqli_fetch_assoc($result)) {
           if (isset($row['username'])) {
             $name = htmlspecialchars((string)$row['username'], ENT_QUOTES);
-            echo '<option value="'.$name.'">'.$name.'</option>';
+            echo '<option value="' . $name . '">' . $name . '</option>';
           }
         }
         mysqli_free_result($result);

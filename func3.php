@@ -1,6 +1,15 @@
 <?php
-session_start();
-
+ session_set_cookie_params([
+    'lifetime' => 0,         
+    'path' => '/',            
+    'domain' => '',           
+    'secure' => false,        
+    'httponly' => true,       
+    'samesite' => 'Lax'       
+]);
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -66,7 +75,7 @@ function display_docs()
         while($row = mysqli_fetch_array($result, MYSQLI_ASSOC))
         {
             $name = htmlspecialchars((string)$row['name'], ENT_QUOTES, 'UTF-8');
-            echo '<option value="'.$name.'">'.$name.'</option>';
+            echo '<option value="' . $name . '">' . $name . '</option>';
         }
     }
 }

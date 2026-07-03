@@ -5,6 +5,15 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 include('func1.php');
+
+ session_set_cookie_params([
+    'lifetime' => 0,         
+    'path' => '/',            
+    'domain' => '',           
+    'secure' => false,        
+    'httponly' => true,       
+    'samesite' => 'Lax'       
+]);
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
@@ -29,15 +38,15 @@ if(isset($_GET['pid']) && isset($_GET['ID']) && isset($_GET['appdate']) && isset
 }
 
 if(isset($_POST['prescribe']) && isset($_POST['pid']) && isset($_POST['ID']) && isset($_POST['appdate']) && isset($_POST['apptime']) && isset($_POST['lname']) && isset($_POST['fname'])){
-  $appdate = $_POST['appdate']; 
-  $apptime = $_POST['apptime']; 
-  $disease = $_POST['disease'];
-  $allergy = $_POST['allergy'];
-  $fname = $_POST['fname'];
-  $lname = $_POST['lname'];
-  $pid = $_POST['pid']; 
-  $ID = $_POST['ID']; 
-  $prescription = $_POST['prescription'];
+  $appdate = preg_match('/^\d{4}-\d{2}-\d{2}$/', $_POST['appdate']) ? $_POST['appdate'] : '';
+  $apptime = preg_match('/^\d{2}:\d{2}(?::\d{2})?$/', $_POST['apptime']) ? $_POST['apptime'] : '';
+  $disease = trim($_POST['disease']);
+  $allergy = trim($_POST['allergy']);
+  $fname = preg_match('/^[a-zA-Z\s\-\.\']{1,100}$/', $_POST['fname']) ? $_POST['fname'] : '';
+  $lname = preg_match('/^[a-zA-Z\s\-\.\']{1,100}$/', $_POST['lname']) ? $_POST['lname'] : '';
+  $pid = filter_var($_POST['pid'], FILTER_VALIDATE_INT) !== false ? (int)$_POST['pid'] : '';
+  $ID = filter_var($_POST['ID'], FILTER_VALIDATE_INT) !== false ? (int)$_POST['ID'] : '';
+  $prescription = trim($_POST['prescription']);
   
   $query = "INSERT into prestb(doctor,pid,ID,fname,lname,appdate,apptime,disease,allergy,prescription) VALUES (?,?,?,?,?,?,?,?,?,?)";
   $stmt = mysqli_prepare($con, $query);
