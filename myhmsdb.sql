@@ -30,15 +30,14 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `admintb` (
   `username` varchar(50) NOT NULL,
-  `password` varchar(30) NOT NULL
+  `password` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `admintb`
 --
-
 INSERT INTO `admintb` (`username`, `password`) VALUES
-('admin', 'admin123');
+('admin', '$2y$10$OdynGKMxIW5yrnhzz5CQl.3Pzvt/gYvEnTS6u1w0DcptN2ZO7.i8S');
 
 -- --------------------------------------------------------
 
@@ -116,7 +115,7 @@ INSERT INTO `contact` (`name`, `email`, `contact`, `message`) VALUES
 
 CREATE TABLE `doctb` (
   `username` varchar(50) NOT NULL,
-  `password` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
   `email` varchar(50) NOT NULL,
   `spec` varchar(50) NOT NULL,
   `docFees` int(10) NOT NULL
@@ -125,16 +124,15 @@ CREATE TABLE `doctb` (
 --
 -- Dumping data for table `doctb`
 --
-
 INSERT INTO `doctb` (`username`, `password`, `email`, `spec`, `docFees`) VALUES
-('ashok', 'ashok123', 'ashok@gmail.com', 'General', 500),
-('arun', 'arun123', 'arun@gmail.com', 'Cardiologist', 600),
-('Dinesh', 'dinesh123', 'dinesh@gmail.com', 'General', 700),
-('Ganesh', 'ganesh123', 'ganesh@gmail.com', 'Pediatrician', 550),
-('Kumar', 'kumar123', 'kumar@gmail.com', 'Pediatrician', 800),
-('Amit', 'amit123', 'amit@gmail.com', 'Cardiologist', 1000),
-('Abbis', 'abbis123', 'abbis@gmail.com', 'Neurologist', 1500),
-('Tiwary', 'tiwary123', 'tiwary@gmail.com', 'Pediatrician', 450);
+('ashok', '$2y$10$/62EhZIqReZRFR4IjQxlOOtKwgJQuEEeZ/pQ9Vt7wdwO/W3cEYXx6', 'ashok@gmail.com', 'General', 500),
+('arun', '$2y$10$.uLBDb9bbUxHv6vA88ursu7NfZ9Ms8PiwGlaL0QTdzEH/4g9p4jB.', 'arun@gmail.com', 'Cardiologist', 600),
+('Dinesh', '$2y$10$gJtYBsoN38cLdWS6o5nb0eExdRD86UTjIafKpKd5wmSVe2LlANCGu', 'dinesh@gmail.com', 'General', 700),
+('Ganesh', '$2y$10$46yf/H16oj9wUyk.zlPFIeWuSnq/PSuNP5lyTxELFZMAGFJLE4Xlu', 'ganesh@gmail.com', 'Pediatrician', 550),
+('Kumar', '$2y$10$Tw0WMIXBXPwO6Q39F2NfBOgK6RXqktJWSaYewAq624TIhF1CJtSky', 'kumar@gmail.com', 'Pediatrician', 800),
+('Amit', '$2y$10$j8euwsz2.9jiwKN8N1082.mh6AoW0gv6Z7jf77RZRwvt5biyA6IDK', 'amit@gmail.com', 'Cardiologist', 1000),
+('Abbis', '$2y$10$NjLmxv/fjBCSGlyihehKEOEhpVomAMbVfES.kYrbUxPWCrgftKNfi', 'abbis@gmail.com', 'Neurologist', 1500),
+('Tiwary', '$2y$10$DnJjDZZ/1z1XgEdwfiU.WuvP4Q1R1tyb4fz3oCFWXJRFWHkX8J.AC', 'tiwary@gmail.com', 'Pediatrician', 450);
 
 -- --------------------------------------------------------
 
@@ -149,26 +147,25 @@ CREATE TABLE `patreg` (
   `gender` varchar(10) NOT NULL,
   `email` varchar(30) NOT NULL,
   `contact` varchar(10) NOT NULL,
-  `password` varchar(30) NOT NULL,
-  `cpassword` varchar(30) NOT NULL
+  `password` varchar(255) NOT NULL,
+  `cpassword` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `patreg`
 --
-
 INSERT INTO `patreg` (`pid`, `fname`, `lname`, `gender`, `email`, `contact`, `password`, `cpassword`) VALUES
-(1, 'Ram', 'Kumar', 'Male', 'ram@gmail.com', '9876543210', 'ram123', 'ram123'),
-(2, 'Alia', 'Bhatt', 'Female', 'alia@gmail.com', '8976897689', 'alia123', 'alia123'),
-(3, 'Shahrukh', 'khan', 'Male', 'shahrukh@gmail.com', '8976898463', 'shahrukh123', 'shahrukh123'),
-(4, 'Kishan', 'Lal', 'Male', 'kishansmart0@gmail.com', '8838489464', 'kishan123', 'kishan123'),
-(5, 'Gautam', 'Shankararam', 'Male', 'gautam@gmail.com', '9070897653', 'gautam123', 'gautam123'),
-(6, 'Sushant', 'Singh', 'Male', 'sushant@gmail.com', '9059986865', 'sushant123', 'sushant123'),
-(7, 'Nancy', 'Deborah', 'Female', 'nancy@gmail.com', '9128972454', 'nancy123', 'nancy123'),
-(8, 'Kenny', 'Sebastian', 'Male', 'kenny@gmail.com', '9809879868', 'kenny123', 'kenny123'),
-(9, 'William', 'Blake', 'Male', 'william@gmail.com', '8683619153', 'william123', 'william123'),
-(10, 'Peter', 'Norvig', 'Male', 'peter@gmail.com', '9609362815', 'peter123', 'peter123'),
-(11, 'Shraddha', 'Kapoor', 'Female', 'shraddha@gmail.com', '9768946252', 'shraddha123', 'shraddha123');
+(1, 'Ram', 'Kumar', 'Male', 'ram@gmail.com', '9876543210', '$2y$10$wyeq0XLNZYpA0tetue59t.9.8OYwQyIKDV8eI38aXi2QTyIoOh6pC', '$2y$10$wyeq0XLNZYpA0tetue59t.9.8OYwQyIKDV8eI38aXi2QTyIoOh6pC'),
+(2, 'Alia', 'Bhatt', 'Female', 'alia@gmail.com', '8976897689', '$2y$10$xkHLoQxyQ57JmywTtUgP0OqVRJj8QCIea8HjrUqNbXSFs0Ekb/Uhu', '$2y$10$xkHLoQxyQ57JmywTtUgP0OqVRJj8QCIea8HjrUqNbXSFs0Ekb/Uhu'),
+(3, 'Shahrukh', 'khan', 'Male', 'shahrukh@gmail.com', '8976898463', '$2y$10$CB5rqcbW1TGpOzBweA/oAezSHqF8oirs2StMbAF50CInAjXzEdC56', '$2y$10$CB5rqcbW1TGpOzBweA/oAezSHqF8oirs2StMbAF50CInAjXzEdC56'),
+(4, 'Kishan', 'Lal', 'Male', 'kishansmart0@gmail.com', '8838489464', '$2y$10$imPAB/6Gme/qs.addDCJeeUwC90VjZirP5LXfBpEyphlCZhq7i0/K', '$2y$10$imPAB/6Gme/qs.addDCJeeUwC90VjZirP5LXfBpEyphlCZhq7i0/K'),
+(5, 'Gautam', 'Shankararam', 'Male', 'gautam@gmail.com', '9070897653', '$2y$10$cy75McreNnnpPLL7seOUlu8On0yHFXqwJUBDjneEnBq3VDCmRIrjy', '$2y$10$cy75McreNnnpPLL7seOUlu8On0yHFXqwJUBDjneEnBq3VDCmRIrjy'),
+(6, 'Sushant', 'Singh', 'Male', 'sushant@gmail.com', '9059986865', '$2y$10$7xPk0uSVnri3XSnO2mVQcO98/BNrvFQekD89TS2cxjujqskMrAvFe', '$2y$10$7xPk0uSVnri3XSnO2mVQcO98/BNrvFQekD89TS2cxjujqskMrAvFe'),
+(7, 'Nancy', 'Deborah', 'Female', 'nancy@gmail.com', '9128972454', '$2y$10$Nb4H4I5hmpw1SV268CFFbe2qjOtgaZgr62CIonPzGSKZJlgSvHviK', '$2y$10$Nb4H4I5hmpw1SV268CFFbe2qjOtgaZgr62CIonPzGSKZJlgSvHviK'),
+(8, 'Kenny', 'Sebastian', 'Male', 'kenny@gmail.com', '9809879868', '$2y$10$NPCH/KiGJZO.YhAwY6Oc5OpOG5Fg1y2mM/M7CNOTBbnEJWe1E7cC.', '$2y$10$NPCH/KiGJZO.YhAwY6Oc5OpOG5Fg1y2mM/M7CNOTBbnEJWe1E7cC.'),
+(9, 'William', 'Blake', 'Male', 'william@gmail.com', '8683619153', '$2y$10$RBM12/ipuRFpPMsIMlmotOSILR/shCm5FUBe91M5qehxnu8YT1dLu', '$2y$10$RBM12/ipuRFpPMsIMlmotOSILR/shCm5FUBe91M5qehxnu8YT1dLu'),
+(10, 'Peter', 'Norvig', 'Male', 'peter@gmail.com', '9609362815', '$2y$10$m0V.jKcsMbsaa1SVkBPqQeO1G6fimCKOHej.UTad5cfcS.FR.ROfK', '$2y$10$m0V.jKcsMbsaa1SVkBPqQeO1G6fimCKOHej.UTad5cfcS.FR.ROfK'),
+(11, 'Shraddha', 'Kapoor', 'Female', 'shraddha@gmail.com', '9768946252', '$2y$10$CgDm3HKXW3KcM1gUmOkkqOJAfEi7UqL4YWSGLz0Cia3o7fjc./pcS', '$2y$10$CgDm3HKXW3KcM1gUmOkkqOJAfEi7UqL4YWSGLz0Cia3o7fjc./pcS');
 
 -- --------------------------------------------------------
 
