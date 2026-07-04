@@ -20,7 +20,7 @@ $gender = $_SESSION['gender'];
 $lname = $_SESSION['lname'];
 $contact = $_SESSION['contact'];
 
-// --- 1. PRENOTAZIONE APPUNTAMENTO (POST) ---
+
 if(isset($_POST['app-submit']))
 {
   requireValidCSRFToken();

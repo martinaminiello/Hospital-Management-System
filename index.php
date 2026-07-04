@@ -52,7 +52,7 @@ function checklen()
 
 </head>
 
-<!------ Include the above in your HEAD tag ---------->
+
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav" >
     <div class="container">

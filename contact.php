@@ -11,14 +11,14 @@ if (!$con) {
 
 if(isset($_POST['btnSubmit']))
 {
-    // Debug: check if token is in POST
+  
     if (empty($_POST['csrf_token'])) {
         echo("<script>alert('CSRF token not found in form submission. Please reload the page.');
               window.location.href = 'contact-form.php';</script>");
         exit();
     }
     
-    // Validate CSRF token - NO reinitialize, just validate
+    // Validate CSRF token 
     if (!validateCSRFToken()) {
         http_response_code(403);
         echo("<script>alert('Security validation failed. Please try again.');
@@ -47,7 +47,7 @@ if(isset($_POST['btnSubmit']))
 
     if(empty($name) || empty($contact)) {
         http_response_code(400); 
-        die("Input non valido rilevato.");
+        die("INVALID INPUT.");
     }
 
     $query = "INSERT into contact(name,email,contact,message) VALUES(?,?,?,?);";

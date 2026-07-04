@@ -18,7 +18,7 @@ if (!$con) {
 }
 
 if(isset($_POST['adsub'])){
-    // Validazione Token CSRF
+
     if (!validateCSRFToken()) {
       echo("<script>alert('Security validation failed. Please try again.');
             window.location.href = 'index.php';</script>");
@@ -35,17 +35,17 @@ if(isset($_POST['adsub'])){
         if(mysqli_stmt_execute($stmt)){
             $result = mysqli_stmt_get_result($stmt);
             
-            // Verifichiamo se esiste esattamente un amministratore con questo username
+           
             if(mysqli_num_rows($result) == 1)
             {
                 $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
                 
-                // Controllo sicuro della password hashata
+               
                 if (password_verify($password, $row['password'])) {
                     $_SESSION['username'] = $username;
                     mysqli_stmt_close($stmt);
                     
-                    // CORRETTO: Il redirect viene eseguito subito qui dentro
+                  
                     header("Location: admin-panel1.php");
                     exit();
                 } else {
@@ -90,7 +90,7 @@ function display_docs()
     if($result) {
         while($row = mysqli_fetch_array($result, MYSQLI_ASSOC))
         {
-            // CORRETTO: Cambiato da 'username' a 'name' per combaciare con la query SELECT sopra
+          
             $name = h($row['name']);
             echo '<option value="' . $name . '">' . $name . '</option>';
         }

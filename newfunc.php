@@ -35,7 +35,7 @@ function display_specs() {
   $result = mysqli_query($con, $query);
   while($row = mysqli_fetch_array($result, MYSQLI_ASSOC))
   {
-    // CORRETTO: Sanificazione centralizzata con h()
+  
     $spec = h($row['spec']);
     echo '<option data-value="'.$spec.'">'.$spec.'</option>';
   }

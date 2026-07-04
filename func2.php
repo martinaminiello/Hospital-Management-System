@@ -37,7 +37,7 @@ if(isset($_POST['patsub1'])){
   
   if (!preg_match('/^[a-zA-Z]+$/', $_POST['gender'])) {
       http_response_code(400);
-      die("Formato genere non valido.");
+      die("Invalid genre.");
   }
 
   $gender = htmlspecialchars((string)$_POST['gender'], ENT_QUOTES, 'UTF-8');
@@ -51,7 +51,7 @@ if(isset($_POST['patsub1'])){
   
   if(empty($fname) || empty($lname) || empty($contact) || empty($gender)){
       http_response_code(400);
-      die("Input non valido rilevato.");
+      die("Invalid input.");
   }
   
   if($password == $cpassword){
@@ -100,7 +100,7 @@ if(isset($_POST['update_data']))
   
   if(empty($contact)){
       http_response_code(400);
-      die("Contatto non valido.");
+      die("Invalid contact.");
   }
   
   $query = "UPDATE appointmenttb SET payment=? WHERE contact=?;";
@@ -148,7 +148,7 @@ function display_docs()
   $result = mysqli_query($con, $query);
   while($row = mysqli_fetch_array($result, MYSQLI_ASSOC))
   {
-     // CORRETTO: Cambiato da username a name per combaciare con l'INSERT
+    
      $name = h($row['name']);
      echo '<option value="' . $name . '">' . $name . '</option>';
   }
