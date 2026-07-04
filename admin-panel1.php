@@ -1,8 +1,5 @@
 <?php 
-// 1. FORZA PHP A MOSTRARE GLI ERRORE INVECE DELLA PAGINA BIANCA
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+
 
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
@@ -18,7 +15,7 @@ if (!$con) {
     die("Connessione al database fallita: " . mysqli_connect_error());
 }
 
-// Nota: Assicurati che newfunc.php non contenga funzioni duplicate o output testuali prima del dovuto
+
 include_once('newfunc.php');
 
 if (!function_exists('h')) {

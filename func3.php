@@ -11,10 +11,6 @@ function h($value) {
 require_once('csrf_token.php');
 initializeCSRFToken();
 
-// Mostra gli errori in fase di sviluppo
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
 $con = mysqli_connect("localhost", "root", "", "myhmsdb");
 if (!$con) {
