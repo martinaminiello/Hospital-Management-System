@@ -44,7 +44,14 @@ if(isset($_POST['patsub1'])){
   
   $clean_contact = preg_replace('/[^0-9]/', '', $_POST['contact']);
   $contact = substr($clean_contact, 0, 10);
-  
+    if (strpbrk($contact, './\\') !== false || strpbrk($contact, './\\') !== false) {
+      http_response_code(400);
+      die("Path invalid inputs!.");
+  }
+      if (strpbrk($_POST['email'], './\\') !== false || strpbrk($_POST['email'], './\\') !== false) {
+      http_response_code(400);
+      die("Path invalid inputs!.");
+  }
   $email = htmlspecialchars((string)strip_tags($_POST['email']), ENT_QUOTES, 'UTF-8');
   $password = $_POST['password'];
   $cpassword = $_POST['cpassword'];
